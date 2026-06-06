@@ -9,4 +9,6 @@ public class ClusterProfile
 	public string BootstrapServerIP { get; set; }
 
 	public string KafkaClusterVersion { get; set; }
+
+	public ZookeeperSettings ZookeeperSettings { get; set; }
 }
