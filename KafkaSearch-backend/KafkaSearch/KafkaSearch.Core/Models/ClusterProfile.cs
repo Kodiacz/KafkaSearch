@@ -1,6 +1,4 @@
-﻿using System.Security.Principal;
-
-namespace KafkaSearch.Core.Models;
+﻿namespace KafkaSearch.Core.Models;
 
 public class ClusterProfile
 {
@@ -10,5 +8,5 @@ public class ClusterProfile
 
 	public string? KafkaClusterVersion { get; set; }
 
-	public ZookeeperSettings ZookeeperSettings { get; set; }
+	public ZookeeperSettings? ZookeeperSettings { get; set; }
 }
