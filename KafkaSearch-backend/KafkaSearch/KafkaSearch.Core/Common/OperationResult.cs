@@ -22,7 +22,7 @@ public readonly record struct Failure
 		Message = message;
 		Code = code;
 		Type = type;
-
+		OperationName = operationName;
 	}
 
 	public Exception? Exception { get; }

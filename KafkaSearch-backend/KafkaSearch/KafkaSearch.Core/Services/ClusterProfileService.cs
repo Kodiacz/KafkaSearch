@@ -34,12 +34,12 @@ public class ClusterProfileService(IOptions<KafkaOptions> kafkaOptions) : IClust
         return result;
     }
 
-	public OperationResult<bool> Delete(ClusterProfile clusterProfile)
+	public OperationResult<bool> Delete(string clusterName)
 	{
 		throw new NotImplementedException();
 	}
 
-	public OperationResult<ClusterProfile[]> GetAll(string[] clusterNames)
+	public OperationResult<ClusterProfile[]> GetAll()
 	{
 		throw new NotImplementedException();
 	}
@@ -49,7 +49,7 @@ public class ClusterProfileService(IOptions<KafkaOptions> kafkaOptions) : IClust
 		throw new NotImplementedException();
 	}
 
-	public OperationResult<bool> Update(string clusterName)
+	public OperationResult<bool> Update(string clusterName, ClusterProfile clusterProfile)
 	{
 		throw new NotImplementedException();
 	}
