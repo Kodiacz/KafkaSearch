@@ -39,7 +39,7 @@ public class ClusterProfileService(IOptions<KafkaOptions> kafkaOptions) : IClust
 		throw new NotImplementedException();
 	}
 
-	public OperationResult<ClusterProfile[]> GetByAll(string[] clusterNames)
+	public OperationResult<ClusterProfile[]> GetAll(string[] clusterNames)
 	{
 		throw new NotImplementedException();
 	}
