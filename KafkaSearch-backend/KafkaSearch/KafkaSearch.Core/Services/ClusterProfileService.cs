@@ -9,7 +9,7 @@ using System.Text.Json;
 
 public class ClusterProfileService(IOptions<KafkaOptions> kafkaOptions) : IClusterProfileService
 {
-    public OperationResult<bool> CreateClusterProfile(ClusterProfile clusterProfile)
+    public OperationResult<bool> Create(ClusterProfile clusterProfile)
     {
         if (!ValidateClusterProfile(clusterProfile))
         {
