@@ -1,5 +1,6 @@
 ﻿namespace KafkaSearch.Core.Services;
 
+using KafkaSearch.Core.Abstractions;
 using KafkaSearch.Core.Common;
 using KafkaSearch.Core.Models;
 using KafkaSearch.Core.Options;
@@ -7,7 +8,9 @@ using KafkaSearch.Core.Services.Interfaces;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 
-public class ClusterProfileService(IOptions<KafkaOptions> kafkaOptions) : IClusterProfileService
+public class ClusterProfileService(
+    IOptions<KafkaOptions> kafkaOptions,
+    IFileSystem fileSystem) : IClusterProfileService
 {
     public OperationResult<bool> Create(ClusterProfile clusterProfile)
     {
@@ -15,10 +18,11 @@ public class ClusterProfileService(IOptions<KafkaOptions> kafkaOptions) : IClust
         {
             return OperationResult.Fail<bool>(Failure.Validation("Invalid cluster profile."));
         }
+        var directory = kafkaOptions.Value.ClusterProfileDataPath;
 
-        var path = Path.Combine(kafkaOptions.Value.ClusterProfileDataPath, $"{clusterProfile.ClusterName}-ClusterProfile.json");
+		var path = Path.Combine(kafkaOptions.Value.ClusterProfileDataPath, $"{clusterProfile.ClusterName}-ClusterProfile.json");
 
-        if (File.Exists(path))
+        if (fileSystem.FileExists(path))
         {
             return OperationResult.Fail<bool>(Failure.Validation("Cluster profile already exists."));
         }
@@ -28,9 +32,11 @@ public class ClusterProfileService(IOptions<KafkaOptions> kafkaOptions) : IClust
             WriteIndented = true
         });
 
-		File.WriteAllText(path, json);
+        var result = OperationResult.Try(() => {
+            fileSystem.WriteAllText(path, json);
+            return true;
+		});
 
-		var result = OperationResult.Ok(true);
         return result;
     }
 
