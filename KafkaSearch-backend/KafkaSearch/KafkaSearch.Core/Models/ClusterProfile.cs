@@ -2,11 +2,11 @@
 
 public class ClusterProfile
 {
-	public required string ClusterName { get; set; }
+	public required string ClusterName { get; init; }
 
-	public required string BootstrapServers { get; set; }
+	public required string BootstrapServers { get; init; }
 
-	public string? KafkaClusterVersion { get; set; }
+	public string? KafkaClusterVersion { get; init; }
 
-	public ZookeeperSettings? ZookeeperSettings { get; set; }
+	public ZookeeperSettings? ZookeeperSettings { get; init; }
 }
