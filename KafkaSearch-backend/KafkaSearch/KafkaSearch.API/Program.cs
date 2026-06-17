@@ -1,3 +1,4 @@
+using KafkaSearch.API.BacgroundServices;
 using KafkaSearch.Core.Options;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,7 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(); 
+builder.Services.AddHostedService<AppStartupService>();
 builder.Services.AddOptions<KafkaOptions>()
 	.Configure<IWebHostEnvironment>((opt, env) =>
 	{
