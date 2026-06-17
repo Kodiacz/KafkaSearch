@@ -12,6 +12,8 @@ public class ClusterProfileService(
     IOptions<KafkaOptions> kafkaOptions,
     IFileSystem fileSystem) : IClusterProfileService
 {
+    public const string ClusterProfileFilePattern = "{0}-ClusterProfile.json";
+
     public OperationResult<bool> Create(ClusterProfile clusterProfile)
     {
         if (!ValidateClusterProfile(clusterProfile))
@@ -20,7 +22,7 @@ public class ClusterProfileService(
         }
         var directory = kafkaOptions.Value.ClusterProfileDataPath;
 
-		var path = Path.Combine(kafkaOptions.Value.ClusterProfileDataPath, $"{clusterProfile.ClusterName}-ClusterProfile.json");
+		var path = Path.Combine(kafkaOptions.Value.ClusterProfileDataPath, string.Format(ClusterProfileFilePattern, clusterProfile.ClusterName));
 
         if (fileSystem.FileExists(path))
         {
@@ -70,4 +72,10 @@ public class ClusterProfileService(
 
         return true;
     }
+}
+
+public static class ErrorMessage
+{
+    public const string InvalidClusterProfile = "Invalid cluster profile.";
+    public const string AlreadyExists = "Cluster profile already exists.";
 }
