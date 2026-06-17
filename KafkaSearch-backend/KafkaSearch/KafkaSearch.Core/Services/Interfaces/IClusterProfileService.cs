@@ -1,8 +1,9 @@
-﻿using KafkaSearch.Core.Models;
+﻿using KafkaSearch.Core.Common;
+using KafkaSearch.Core.Models;
 
 namespace KafkaSearch.Core.Services.Interfaces;
 
 public interface IClusterProfileService
 {
-	bool CreateClusterProfile(ClusterProfile clusterProfile);
+	OperationResult<bool> CreateClusterProfile(ClusterProfile clusterProfile);
 }
