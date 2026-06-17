@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/tests/">
+    <Project Path="Kafka.Core.Test/Kafka.Core.Test.csproj" Id="2b4e01d6-162f-412b-a49b-ecd427f4a49a" />
+  </Folder>
   <Project Path="KafkaSearch.API/KafkaSearch.API.csproj" />
   <Project Path="KafkaSearch.Core/KafkaSearch.Core.csproj" />
 </Solution>

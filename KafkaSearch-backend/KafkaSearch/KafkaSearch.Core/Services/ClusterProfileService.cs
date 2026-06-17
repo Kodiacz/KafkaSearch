@@ -18,16 +18,43 @@ public class ClusterProfileService(IOptions<KafkaOptions> kafkaOptions) : IClust
 
         var path = Path.Combine(kafkaOptions.Value.ClusterProfileDataPath, $"{clusterProfile.ClusterName}-ClusterProfile.json");
 
-        var json = System.Text.Json.JsonSerializer.Serialize(clusterProfile, new JsonSerializerOptions
+        if (File.Exists(path))
+        {
+            return OperationResult.Fail<bool>(Failure.Validation("Cluster profile already exists."));
+        }
+
+		var json = JsonSerializer.Serialize(clusterProfile, new JsonSerializerOptions
         {
             WriteIndented = true
         });
 
-        var result = OperationResult.Ok(true);
+		File.WriteAllText(path, json);
+
+		var result = OperationResult.Ok(true);
         return result;
     }
 
-    private bool ValidateClusterProfile(ClusterProfile clusterProfile)
+	public OperationResult<bool> Delete(ClusterProfile clusterProfile)
+	{
+		throw new NotImplementedException();
+	}
+
+	public OperationResult<ClusterProfile[]> GetByAll(string[] clusterNames)
+	{
+		throw new NotImplementedException();
+	}
+
+	public OperationResult<ClusterProfile> GetByName(string clusterName)
+	{
+		throw new NotImplementedException();
+	}
+
+	public OperationResult<bool> Update(string clusterName)
+	{
+		throw new NotImplementedException();
+	}
+
+	private bool ValidateClusterProfile(ClusterProfile clusterProfile)
     {
         if (clusterProfile == null) return false;
 
