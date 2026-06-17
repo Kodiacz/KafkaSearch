@@ -8,9 +8,15 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddOptions<KafkaOptions>()
-    .BindConfiguration("KafkaOptions")
-    .ValidateDataAnnotations()
-    .ValidateOnStart();
+	.Configure<IWebHostEnvironment>((opt, env) =>
+	{
+		opt.ClusterProfileDataPath = Path.Combine(
+			env.ContentRootPath,
+			opt.ClusterProfileDataPath);
+	})
+	.BindConfiguration("KafkaOptions")
+	.ValidateDataAnnotations()
+	.ValidateOnStart();
 
 var app = builder.Build();
 
