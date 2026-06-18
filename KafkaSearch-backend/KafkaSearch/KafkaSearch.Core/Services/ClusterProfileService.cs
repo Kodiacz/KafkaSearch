@@ -12,6 +12,13 @@ public class ClusterProfileService(
     IOptions<KafkaOptions> kafkaOptions,
     IFileSystem fileSystem) : IClusterProfileService
 {
+    public static class ClusterProfileServiceErrorMessages
+    {
+        public const string InvalidClusterProfile = "Invalid cluster profile.";
+        public const string AlreadyExists = "Cluster profile already exists.";
+        public const string ClusterProfileDataPathDoesNotExist = "Cluster profile data path does not exist.";
+    }
+
     public const string ClusterProfileFilePattern = "{0}-ClusterProfile.json";
 
     public OperationResult<bool> Create(ClusterProfile clusterProfile)
@@ -20,13 +27,14 @@ public class ClusterProfileService(
         {
             return OperationResult.Fail<bool>(Failure.Validation("Invalid cluster profile."));
         }
+
         var directory = kafkaOptions.Value.ClusterProfileDataPath;
 
-		var path = Path.Combine(kafkaOptions.Value.ClusterProfileDataPath, string.Format(ClusterProfileFilePattern, clusterProfile.ClusterName));
+		var path = Path.Combine(directory, string.Format(ClusterProfileFilePattern, clusterProfile.ClusterName));
 
-        if (fileSystem.FileExists(path))
+        if (!fileSystem.FileExists(path))
         {
-            return OperationResult.Fail<bool>(Failure.Validation("Cluster profile already exists."));
+            return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.ClusterProfileDataPathDoesNotExist));
         }
 
 		var json = JsonSerializer.Serialize(clusterProfile, new JsonSerializerOptions
@@ -66,16 +74,10 @@ public class ClusterProfileService(
     {
         if (clusterProfile == null) return false;
 
-        if (string.IsNullOrEmpty(clusterProfile.ClusterName)) return false;
+        if (string.IsNullOrEmpty(clusterProfile.ClusterName) || string.IsNullOrWhiteSpace(clusterProfile.ClusterName)) return false;
 
-        if (string.IsNullOrEmpty(clusterProfile.BootstrapServers)) return false;
+        if (string.IsNullOrEmpty(clusterProfile.BootstrapServers) || string.IsNullOrWhiteSpace(clusterProfile.BootstrapServers)) return false;
 
         return true;
     }
-}
-
-public static class ErrorMessage
-{
-    public const string InvalidClusterProfile = "Invalid cluster profile.";
-    public const string AlreadyExists = "Cluster profile already exists.";
 }
