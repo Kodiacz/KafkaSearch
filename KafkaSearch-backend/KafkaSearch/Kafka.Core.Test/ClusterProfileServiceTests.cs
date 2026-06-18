@@ -4,6 +4,7 @@ using KafkaSearch.Core.Options;
 using KafkaSearch.Core.Services;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using System.Text.Json;
 using static KafkaSearch.Core.Services.ClusterProfileService;
 
 namespace Kafka.Core.Test;
@@ -42,69 +43,46 @@ public class ClusterProfileServiceTests : IDisposable
         Assert.Equal(ClusterProfileServiceErrorMessages.InvalidClusterProfile, result.Failure.Message);
     }
 
-    [Fact] 
-    public void Create_WithEmptyClusterName_ReturnsValidationFailure() 
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData(null)]
+    public void Create_WithInvalidClusterName_ReturnsValidationFailure(string clusterName)
     {
         // Arrange
-
-        ClusterProfile clusterProfile = new ClusterProfile
+        var clusterProfile = new ClusterProfile
         {
-            ClusterName = "",
+            ClusterName = clusterName,
             BootstrapServers = "localhost:9092"
         };
 
         // Act
-
         var result = _clusterProfileService.Create(clusterProfile);
 
         // Assert
-
         Assert.False(result.IsSuccess);
         Assert.False(result.Value);
         Assert.True(result.IsFailure);
         Assert.Equal(ClusterProfileServiceErrorMessages.InvalidClusterProfile, result.Failure.Message);
     }
 
-    [Fact]
-    public void Create_WithWhiteSpaceClusterName_ReturnsValidationFailure()
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData(null)]
+    public void Create_WithInvalidClusterBootstrapServers_ReturnsValidationFailure(string bootstrapServers)
     {
         // Arrange
-
-        ClusterProfile clusterProfile = new ClusterProfile
-        {
-            ClusterName = "   ",
-            BootstrapServers = "localhost:9092"
-        };
-
-        // Act
-
-        var result = _clusterProfileService.Create(clusterProfile);
-
-        // Assert
-
-        Assert.False(result.IsSuccess);
-        Assert.False(result.Value);
-        Assert.True(result.IsFailure);
-        Assert.Equal(ClusterProfileServiceErrorMessages.InvalidClusterProfile, result.Failure.Message);
-    }
-
-    [Fact] 
-    public void Create_WithEmptyBootstrapServers_ReturnsValidationFailure() 
-    {
-        // Arrange
-
-        ClusterProfile clusterProfile = new ClusterProfile
+        var clusterProfile = new ClusterProfile
         {
             ClusterName = "TestCluster",
-            BootstrapServers = ""
+            BootstrapServers = bootstrapServers
         };
 
         // Act
-
         var result = _clusterProfileService.Create(clusterProfile);
 
         // Assert
-
         Assert.False(result.IsSuccess);
         Assert.False(result.Value);
         Assert.True(result.IsFailure);
@@ -112,30 +90,7 @@ public class ClusterProfileServiceTests : IDisposable
     }
 
     [Fact]
-    public void Create_WithWhiteSpaceBootstrapServers_ReturnsValidationFailure()
-    {
-        // Arrange
-
-        ClusterProfile clusterProfile = new ClusterProfile
-        {
-            ClusterName = "TestCluster",
-            BootstrapServers = "   "
-        };
-
-        // Act
-
-        var result = _clusterProfileService.Create(clusterProfile);
-
-        // Assert
-
-        Assert.False(result.IsSuccess);
-        Assert.False(result.Value);
-        Assert.True(result.IsFailure);
-        Assert.Equal(ClusterProfileServiceErrorMessages.InvalidClusterProfile, result.Failure.Message);
-    }
-
-    [Fact]
-    public void Create_IfPathDoesNotExist_ReturnsValidationFailure()
+    public void Create_IfPathExists_ReturnsValidationFailure()
     {
         // Arrange
 
@@ -145,7 +100,10 @@ public class ClusterProfileServiceTests : IDisposable
             BootstrapServers = "localhost:9092"
         };
 
-        _kafkaOptions.Value.Returns(new KafkaOptions { ClusterProfileDataPath = "C:\\NonExistentPath" });
+        var directory = "C:\\NonExistentPath";
+        _kafkaOptions.Value.Returns(new KafkaOptions { ClusterProfileDataPath = directory });
+        var path = Path.Combine(directory, string.Format(ClusterProfileFilePattern, clusterProfile.ClusterName));
+        _fileSystem.FileExists(path).Returns(true);
 
         // Act
 
@@ -155,7 +113,7 @@ public class ClusterProfileServiceTests : IDisposable
         Assert.False(result.IsSuccess);
         Assert.False(result.Value);
         Assert.True(result.IsFailure);
-        Assert.Equal(ClusterProfileServiceErrorMessages.ClusterProfileDataPathDoesNotExist, result.Failure.Message);
+        Assert.Equal(ClusterProfileServiceErrorMessages.AlreadyExists, result.Failure.Message);
     }
 
     [Fact]
@@ -168,8 +126,10 @@ public class ClusterProfileServiceTests : IDisposable
             BootstrapServers = "localhost:9092"
         };
 
-        _kafkaOptions.Value.Returns(new KafkaOptions { ClusterProfileDataPath = "C:\\ClusterProfiles" });
-        _fileSystem.FileExists(Arg.Any<string>()).Returns(true);
+        var directory = "C:\\NonExistentPath";
+        _kafkaOptions.Value.Returns(new KafkaOptions { ClusterProfileDataPath = directory });
+        var expectedPath = Path.Combine(directory, string.Format(ClusterProfileFilePattern, clusterProfile.ClusterName));
+        _fileSystem.FileExists(expectedPath).Returns(false);
 
         // Act
         var result = _clusterProfileService.Create(clusterProfile);
@@ -178,8 +138,15 @@ public class ClusterProfileServiceTests : IDisposable
         Assert.True(result.IsSuccess);
         Assert.True(result.Value);
         Assert.False(result.IsFailure);
-        var expectedPath = Path.Combine("C:\\ClusterProfiles", string.Format(ClusterProfileService.ClusterProfileFilePattern, clusterProfile.ClusterName));
         _fileSystem.Received(1).WriteAllText(expectedPath, Arg.Any<string>());
+        _fileSystem.Received(1).WriteAllText(
+             Arg.Any<string>(),
+             Arg.Do<string>(json =>
+             {
+                 var deserialized = JsonSerializer.Deserialize<ClusterProfile>(json);
+                 Assert.Equal(clusterProfile.ClusterName, deserialized.ClusterName);
+                 Assert.Equal(clusterProfile.BootstrapServers, deserialized.BootstrapServers);
+             }));
     }
 
     #endregion
