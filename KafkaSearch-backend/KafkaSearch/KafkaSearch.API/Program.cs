@@ -4,6 +4,7 @@ using KafkaSearch.Core.Abstractions;
 using KafkaSearch.Core.Options;
 using KafkaSearch.Core.Services;
 using KafkaSearch.Core.Services.Interfaces;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi(); 
+builder.Services.AddOpenApi();
 builder.Services.AddHostedService<AppStartupService>();
 
 builder.Services.AddSingleton<IFileSystem, FileSystem>();
@@ -34,6 +35,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
 	app.MapOpenApi();
+	app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();

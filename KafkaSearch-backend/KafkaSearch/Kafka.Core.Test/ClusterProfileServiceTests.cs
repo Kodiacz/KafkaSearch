@@ -138,9 +138,8 @@ public class ClusterProfileServiceTests : IDisposable
         Assert.True(result.IsSuccess);
         Assert.True(result.Value);
         Assert.False(result.IsFailure);
-        _fileSystem.Received(1).WriteAllText(expectedPath, Arg.Any<string>());
         _fileSystem.Received(1).WriteAllText(
-             Arg.Any<string>(),
+             expectedPath,
              Arg.Do<string>(json =>
              {
                  var deserialized = JsonSerializer.Deserialize<ClusterProfile>(json);

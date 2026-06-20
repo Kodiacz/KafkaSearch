@@ -18,7 +18,7 @@ public class ClusterProfileService(
         public const string AlreadyExists = "Cluster profile already exists.";
     }
 
-    public static readonly string ClusterProfileFilePattern = "{0}-ClusterProfile.json";
+    public const string ClusterProfileFilePattern = "{0}-ClusterProfile.json";
 
     public OperationResult<bool> Create(ClusterProfile clusterProfile)
     {
