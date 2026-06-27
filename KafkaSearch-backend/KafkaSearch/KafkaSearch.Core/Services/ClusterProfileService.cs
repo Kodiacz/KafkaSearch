@@ -15,19 +15,21 @@ public class ClusterProfileService : IClusterProfileService
         public const string InvalidClusterProfile = "Invalid cluster profile.";
         public const string AlreadyExists = "Cluster profile already exists.";
         public const string InvalidClusterName = "Invalid cluster name.";
+        public const string ClusterNameNotFound = "Cluster name not found.";
+        public const string InvalidDirectory = "Invalid data directory.";
     }
 
     public const string ClusterProfileFilePattern = "{0}-ClusterProfile.json";
 
     private readonly IFileSystem _fileSystem;
-    private readonly string _dataDirectory;
+        private readonly IOptions<KafkaOptions> _kafkaOptions;
 
     public ClusterProfileService(
         IOptions<KafkaOptions> kafkaOptions,
         IFileSystem fileSystem) 
     {
            _fileSystem = fileSystem;
-           _dataDirectory = kafkaOptions.Value.ClusterProfileDataPath;
+           _kafkaOptions = kafkaOptions;
     }
 
     public OperationResult<bool> Create(ClusterProfile clusterProfile)
@@ -37,7 +39,7 @@ public class ClusterProfileService : IClusterProfileService
             return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.InvalidClusterProfile));
         }
 
-		var path = Path.Combine(_dataDirectory, string.Format(ClusterProfileFilePattern, clusterProfile.ClusterName));
+		var path = CreatePath(clusterProfile.ClusterName);
 
         if (_fileSystem.FileExists(path))
         {
@@ -86,5 +88,11 @@ public class ClusterProfileService : IClusterProfileService
         if (string.IsNullOrWhiteSpace(clusterProfile.BootstrapServers)) return false;
 
         return true;
+    }
+
+    private string CreatePath(string clusterName)
+    {
+        var directory = _kafkaOptions.Value.ClusterProfileDataPath;
+        return Path.Combine(directory, string.Format(ClusterProfileFilePattern, clusterName));
     }
 }

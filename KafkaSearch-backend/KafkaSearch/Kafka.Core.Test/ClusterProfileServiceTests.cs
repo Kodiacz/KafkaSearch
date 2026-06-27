@@ -37,6 +37,7 @@ public class ClusterProfileServiceTests : IDisposable
         Assert.False(result.IsSuccess);
         Assert.False(result.Value);
         Assert.True(result.IsFailure);
+        Assert.Equal(400, result.Failure.StatusCode);
         Assert.Equal(ClusterProfileServiceErrorMessages.InvalidClusterProfile, result.Failure.Message);
     }
 
@@ -60,6 +61,7 @@ public class ClusterProfileServiceTests : IDisposable
         Assert.False(result.IsSuccess);
         Assert.False(result.Value);
         Assert.True(result.IsFailure);
+        Assert.Equal(400, result.Failure.StatusCode);
         Assert.Equal(ClusterProfileServiceErrorMessages.InvalidClusterProfile, result.Failure.Message);
     }
 
@@ -83,6 +85,7 @@ public class ClusterProfileServiceTests : IDisposable
         Assert.False(result.IsSuccess);
         Assert.False(result.Value);
         Assert.True(result.IsFailure);
+        Assert.Equal(400, result.Failure.StatusCode);
         Assert.Equal(ClusterProfileServiceErrorMessages.InvalidClusterProfile, result.Failure.Message);
     }
 
@@ -90,7 +93,6 @@ public class ClusterProfileServiceTests : IDisposable
     public void Create_IfPathExists_ReturnsValidationFailure()
     {
         // Arrange
-
         ClusterProfile clusterProfile = new ClusterProfile
         {
             ClusterName = "TestCluster",
@@ -103,13 +105,13 @@ public class ClusterProfileServiceTests : IDisposable
         _fileSystem.FileExists(path).Returns(true);
 
         // Act
-
         var result = _clusterProfileService.Create(clusterProfile);
 
         // Assert
         Assert.False(result.IsSuccess);
         Assert.False(result.Value);
         Assert.True(result.IsFailure);
+        Assert.Equal(400, result.Failure.StatusCode);
         Assert.Equal(ClusterProfileServiceErrorMessages.AlreadyExists, result.Failure.Message);
     }
 
@@ -162,40 +164,66 @@ public class ClusterProfileServiceTests : IDisposable
         Assert.False(result.IsSuccess);
         Assert.False(result.Value);
         Assert.True(result.IsFailure);
+        Assert.Equal(400, result.Failure.StatusCode);
         Assert.Equal(ClusterProfileServiceErrorMessages.InvalidClusterName, result.Failure.Message);
     }
+
+    [Fact]
     public void Delete_WhenDirectoryDoesNotExist_ReturnsFailure()
     {
         // Arrange
-
+        var clusterName = "TestCluster";
+        var directory = "C:\\NonExistentPath";
+        _fileSystem.DirectoryExists(directory).Returns(false);
+        _kafkaOptions.Value.Returns(new KafkaOptions { ClusterProfileDataPath = directory });
 
         // Act
-
+        var result = _clusterProfileService.Delete(clusterName);
 
         // Assert
-
+        Assert.False(result.IsSuccess);
+        Assert.False(result.Value);
+        Assert.True(result.IsFailure);
+        Assert.Equal(400, result.Failure.StatusCode);
+        Assert.Equal(ClusterProfileServiceErrorMessages.InvalidDirectory, result.Failure.Message);
     }
+
+    [Fact]
     public void Delete_WhenFileDoesNotExist_ReturnsFailure()
     {
         // Arrange
-
+        var clusterName = "UnexistentCluster";
+        var directory = "C:\\ValidPath";
+        _fileSystem.DirectoryExists(directory).Returns(true);
+        _kafkaOptions.Value.Returns(new KafkaOptions { ClusterProfileDataPath = directory });
 
         // Act
-
+        var result = _clusterProfileService.Delete(clusterName);
 
         // Assert
-
+        Assert.False(result.IsSuccess);
+        Assert.False(result.Value);
+        Assert.True(result.IsFailure);
+        Assert.Equal(404, result.Failure.StatusCode);
+        Assert.Equal(ClusterProfileServiceErrorMessages.ClusterNameNotFound, result.Failure.Message);
     }
+
+    [Fact]
     public void Delete_WithValidClusterName_DeletesFileAndReturnsSuccess()
     {
         // Arrange
-
+        var clusterName = "TestCluster";
+        var directory = "C:\\ValidPath";
+        _fileSystem.DirectoryExists(directory).Returns(true);
+        _kafkaOptions.Value.ClusterProfileDataPath.Returns(directory);
 
         // Act
-
+        var result = _clusterProfileService.Delete(clusterName);
 
         // Assert
-
+        Assert.True(result.IsSuccess);
+        Assert.True(result.Value);
+        Assert.False(result.IsFailure);
     }
 
     #endregion

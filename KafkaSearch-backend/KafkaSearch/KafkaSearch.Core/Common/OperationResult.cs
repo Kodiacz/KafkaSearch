@@ -20,14 +20,14 @@ public readonly record struct Failure
 	{
 		Exception = exception;
 		Message = message;
-		Code = code;
+		StatusCode = code;
 		Type = type;
 		OperationName = operationName;
 	}
 
 	public Exception? Exception { get; }
 	public string? Message { get; }
-	public int Code { get; }
+	public int StatusCode { get; }
 	public FailureType Type { get; }
 	public bool IsValidation => Type == FailureType.Validation;
 	public string? OperationName { get; }
