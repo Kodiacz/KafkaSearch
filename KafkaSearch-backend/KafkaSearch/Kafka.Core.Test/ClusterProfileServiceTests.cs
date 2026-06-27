@@ -185,7 +185,7 @@ public class ClusterProfileServiceTests : IDisposable
         Assert.False(result.Value);
         Assert.True(result.IsFailure);
         Assert.Equal(400, result.Failure.StatusCode);
-        Assert.Equal(ClusterProfileServiceErrorMessages.InvalidDirectory, result.Failure.Message);
+        Assert.Equal(ClusterProfileServiceErrorMessages.ClusterNameNotFound, result.Failure.Message);
     }
 
     [Fact]
@@ -214,8 +214,9 @@ public class ClusterProfileServiceTests : IDisposable
         // Arrange
         var clusterName = "TestCluster";
         var directory = "C:\\ValidPath";
-        _fileSystem.DirectoryExists(directory).Returns(true);
-        _kafkaOptions.Value.ClusterProfileDataPath.Returns(directory);
+        var path = Path.Combine(directory, string.Format(ClusterProfileFilePattern, clusterName));
+        _fileSystem.FileExists(path).Returns(true);
+        _kafkaOptions.Value.Returns(new KafkaOptions { ClusterProfileDataPath = directory });
 
         // Act
         var result = _clusterProfileService.Delete(clusterName);

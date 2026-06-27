@@ -39,9 +39,12 @@ public class ClusterProfileService : IClusterProfileService
             return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.InvalidClusterProfile));
         }
 
-		var path = CreatePath(clusterProfile.ClusterName);
+		var pathResult = CreatePath(clusterProfile.ClusterName);
 
-        if (_fileSystem.FileExists(path))
+        if (pathResult.IsFailure)
+            return OperationResult.Fail<bool>(pathResult.Failure);
+
+        if (_fileSystem.FileExists(pathResult.Value!))
         {
             return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.AlreadyExists));
         }
@@ -52,7 +55,7 @@ public class ClusterProfileService : IClusterProfileService
         });
 
         var result = OperationResult.Try(() => {
-            _fileSystem.WriteAllText(path, json);
+            _fileSystem.WriteAllText(pathResult.Value!, json);
             return true;
 		});
 
@@ -61,8 +64,25 @@ public class ClusterProfileService : IClusterProfileService
 
 	public OperationResult<bool> Delete(string clusterName)
 	{
-		throw new NotImplementedException();
-	}
+        if (string.IsNullOrWhiteSpace(clusterName))
+            return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.InvalidClusterName));
+        
+        var pathResult = CreatePath(clusterName);
+
+        if (pathResult.IsFailure)
+            return OperationResult.Fail<bool>(pathResult.Failure);
+
+        if (!_fileSystem.FileExists(pathResult.Value!))
+            return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.ClusterNameNotFound, 404));
+
+        var result = OperationResult.Try(() =>
+        {
+            _fileSystem.DeleteFile(pathResult.Value!);
+            return true;
+        });
+
+        return result;
+    }
 
 	public OperationResult<ClusterProfile[]> GetAll()
 	{
@@ -76,8 +96,35 @@ public class ClusterProfileService : IClusterProfileService
 
 	public OperationResult<bool> Update(string clusterName, ClusterProfile clusterProfile)
 	{
-		throw new NotImplementedException();
-	}
+        if (string.IsNullOrWhiteSpace(clusterName))
+            return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.InvalidClusterName));
+
+        if (!ValidateClusterProfile(clusterProfile))
+        {
+            return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.InvalidClusterProfile));
+        }
+
+        var pathResult = CreatePath(clusterName);
+
+        if (pathResult.IsFailure)
+            return OperationResult.Fail<bool>(pathResult.Failure);
+
+        if (!_fileSystem.FileExists(pathResult.Value!))
+            return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.ClusterNameNotFound, 404));
+
+        var json = JsonSerializer.Serialize(clusterProfile, new JsonSerializerOptions()
+        {
+            WriteIndented = true,
+        });
+
+        var result = OperationResult.Try(() =>
+        {
+            _fileSystem.WriteAllText(pathResult.Value!, json);
+            return true;
+        });
+
+        return result;
+    }
 
 	private bool ValidateClusterProfile(ClusterProfile clusterProfile)
     {
@@ -90,9 +137,13 @@ public class ClusterProfileService : IClusterProfileService
         return true;
     }
 
-    private string CreatePath(string clusterName)
+    private OperationResult<string> CreatePath(string clusterName)
     {
         var directory = _kafkaOptions.Value.ClusterProfileDataPath;
-        return Path.Combine(directory, string.Format(ClusterProfileFilePattern, clusterName));
+
+        if (_fileSystem.DirectoryExists(directory) == false)
+            return OperationResult.Fail<string>(Failure.Validation(ClusterProfileServiceErrorMessages.InvalidDirectory));
+
+        return OperationResult.Ok(Path.Combine(directory, string.Format(ClusterProfileFilePattern, clusterName)));
     }
 }
