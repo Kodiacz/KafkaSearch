@@ -21,8 +21,10 @@ public class ClusterProfileController : ControllerBase
         var result = _clusterProfileService.Create(clusterProfile);
 
         if (result.IsFailure)
-            return BadRequest(result.Failure.Message);
-        
+            return result.Failure.IsValidation
+                ? BadRequest(result.Failure.Message)
+                : StatusCode(500, result.Failure.Message);
+
         return Created();
     }
 }

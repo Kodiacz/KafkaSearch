@@ -28,15 +28,12 @@ public class ClusterProfileServiceTests : IDisposable
     public void Create_WithNullProfile_ReturnsValidationFailure()
     {
         // Arrange
-
         ClusterProfile clusterProfile = null;
 
         // Act
-
         var result = _clusterProfileService.Create(clusterProfile);
 
         // Assert
-
         Assert.False(result.IsSuccess);
         Assert.False(result.Value);
         Assert.True(result.IsFailure);
@@ -151,6 +148,55 @@ public class ClusterProfileServiceTests : IDisposable
     #endregion
 
     #region Delete
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData(null)]
+    public void Delete_WithInvalidClusterName_ReturnsValidationFailure(string wrongClusterName)
+    {
+        // Act
+        var result = _clusterProfileService.Delete(wrongClusterName);
+
+        // Assert
+        Assert.False(result.IsSuccess);
+        Assert.False(result.Value);
+        Assert.True(result.IsFailure);
+        Assert.Equal(ClusterProfileServiceErrorMessages.InvalidClusterName, result.Failure.Message);
+    }
+    public void Delete_WhenDirectoryDoesNotExist_ReturnsFailure()
+    {
+        // Arrange
+
+
+        // Act
+
+
+        // Assert
+
+    }
+    public void Delete_WhenFileDoesNotExist_ReturnsFailure()
+    {
+        // Arrange
+
+
+        // Act
+
+
+        // Assert
+
+    }
+    public void Delete_WithValidClusterName_DeletesFileAndReturnsSuccess()
+    {
+        // Arrange
+
+
+        // Act
+
+
+        // Assert
+
+    }
 
     #endregion
 

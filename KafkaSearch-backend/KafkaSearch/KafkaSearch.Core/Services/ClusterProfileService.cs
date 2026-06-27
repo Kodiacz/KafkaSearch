@@ -8,17 +8,27 @@ using KafkaSearch.Core.Services.Interfaces;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 
-public class ClusterProfileService(
-    IOptions<KafkaOptions> kafkaOptions,
-    IFileSystem fileSystem) : IClusterProfileService
+public class ClusterProfileService : IClusterProfileService
 {
     public static class ClusterProfileServiceErrorMessages
     {
         public const string InvalidClusterProfile = "Invalid cluster profile.";
         public const string AlreadyExists = "Cluster profile already exists.";
+        public const string InvalidClusterName = "Invalid cluster name.";
     }
 
     public const string ClusterProfileFilePattern = "{0}-ClusterProfile.json";
+
+    private readonly IFileSystem _fileSystem;
+    private readonly string _dataDirectory;
+
+    public ClusterProfileService(
+        IOptions<KafkaOptions> kafkaOptions,
+        IFileSystem fileSystem) 
+    {
+           _fileSystem = fileSystem;
+           _dataDirectory = kafkaOptions.Value.ClusterProfileDataPath;
+    }
 
     public OperationResult<bool> Create(ClusterProfile clusterProfile)
     {
@@ -27,11 +37,9 @@ public class ClusterProfileService(
             return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.InvalidClusterProfile));
         }
 
-        var directory = kafkaOptions.Value.ClusterProfileDataPath;
+		var path = Path.Combine(_dataDirectory, string.Format(ClusterProfileFilePattern, clusterProfile.ClusterName));
 
-		var path = Path.Combine(directory, string.Format(ClusterProfileFilePattern, clusterProfile.ClusterName));
-
-        if (fileSystem.FileExists(path))
+        if (_fileSystem.FileExists(path))
         {
             return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.AlreadyExists));
         }
@@ -42,7 +50,7 @@ public class ClusterProfileService(
         });
 
         var result = OperationResult.Try(() => {
-            fileSystem.WriteAllText(path, json);
+            _fileSystem.WriteAllText(path, json);
             return true;
 		});
 
