@@ -103,6 +103,7 @@ public class ClusterProfileServiceTests : IDisposable
         _kafkaOptions.Value.Returns(new KafkaOptions { ClusterProfileDataPath = directory });
         var path = Path.Combine(directory, string.Format(ClusterProfileFilePattern, clusterProfile.ClusterName));
         _fileSystem.FileExists(path).Returns(true);
+        _fileSystem.DirectoryExists(directory).Returns(true);
 
         // Act
         var result = _clusterProfileService.Create(clusterProfile);
@@ -129,6 +130,7 @@ public class ClusterProfileServiceTests : IDisposable
         _kafkaOptions.Value.Returns(new KafkaOptions { ClusterProfileDataPath = directory });
         var expectedPath = Path.Combine(directory, string.Format(ClusterProfileFilePattern, clusterProfile.ClusterName));
         _fileSystem.FileExists(expectedPath).Returns(false);
+        _fileSystem.DirectoryExists(directory).Returns(true);
 
         // Act
         var result = _clusterProfileService.Create(clusterProfile);
@@ -184,8 +186,8 @@ public class ClusterProfileServiceTests : IDisposable
         Assert.False(result.IsSuccess);
         Assert.False(result.Value);
         Assert.True(result.IsFailure);
-        Assert.Equal(400, result.Failure.StatusCode);
-        Assert.Equal(ClusterProfileServiceErrorMessages.ClusterNameNotFound, result.Failure.Message);
+        Assert.Equal(404, result.Failure.StatusCode);
+        Assert.Equal(ClusterProfileServiceErrorMessages.InvalidDirectory, result.Failure.Message);
     }
 
     [Fact]
@@ -217,6 +219,7 @@ public class ClusterProfileServiceTests : IDisposable
         var path = Path.Combine(directory, string.Format(ClusterProfileFilePattern, clusterName));
         _fileSystem.FileExists(path).Returns(true);
         _kafkaOptions.Value.Returns(new KafkaOptions { ClusterProfileDataPath = directory });
+        _fileSystem.DirectoryExists(directory).Returns(true);
 
         // Act
         var result = _clusterProfileService.Delete(clusterName);
@@ -230,6 +233,134 @@ public class ClusterProfileServiceTests : IDisposable
     #endregion
 
     #region Update
+
+    [Fact]
+    public void Update_WithNullProfile_ReturnsValidationFailure()
+    {
+        // Arrange
+        ClusterProfile clusterProfile = null;
+        string clusterName = "TestCluster";
+
+        // Act
+        var result = _clusterProfileService.Update(clusterName, clusterProfile);
+
+        // Assert
+        Assert.False(result.IsSuccess);
+        Assert.False(result.Value);
+        Assert.True(result.IsFailure);
+        Assert.Equal(400, result.Failure.StatusCode);
+        Assert.Equal(ClusterProfileServiceErrorMessages.InvalidClusterProfile, result.Failure.Message);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData(null)]
+    public void Update_WithInvalidClusterName_ReturnsValidationFailure(string invalidClusterName)
+    {
+        // Arrange
+        var clusterProfile = new ClusterProfile
+        {
+            ClusterName = "TestCluster",
+            BootstrapServers = "localhost:9092"
+        };
+
+        // Act
+        var result = _clusterProfileService.Update(invalidClusterName, clusterProfile);
+
+        // Assert
+        Assert.False(result.IsSuccess);
+        Assert.False(result.Value);
+        Assert.True(result.IsFailure);
+        Assert.Equal(400, result.Failure.StatusCode);
+        Assert.Equal(ClusterProfileServiceErrorMessages.InvalidClusterName, result.Failure.Message);
+    }
+
+    [Fact]
+    public void Update_WhenDirectoryDoesNotExist_ReturnsFailure()
+    {
+        // Arrange
+        var clusterName = "TestCluster";
+        var directory = "C:\\NonExistentPath";
+        _fileSystem.DirectoryExists(directory).Returns(false);
+        _kafkaOptions.Value.Returns(new KafkaOptions { ClusterProfileDataPath = directory });
+
+        var newClusterProfile = new ClusterProfile
+        {
+            ClusterName = "UpdatedCluster",
+            BootstrapServers = "localhost:9093"
+        };
+
+        // Act
+        var result = _clusterProfileService.Update(clusterName, newClusterProfile);
+
+        // Assert
+        Assert.False(result.IsSuccess);
+        Assert.False(result.Value);
+        Assert.True(result.IsFailure);
+        Assert.Equal(404, result.Failure.StatusCode);
+        Assert.Equal(ClusterProfileServiceErrorMessages.InvalidDirectory, result.Failure.Message);
+    }
+
+    [Fact]
+    public void Update_WhenFileDoesNotExist_ReturnsFailure()
+    {
+        // Arrange
+        var clusterName = "UnexistentCluster";
+        var directory = "C:\\ValidPath";
+        _fileSystem.DirectoryExists(directory).Returns(true);
+        _kafkaOptions.Value.Returns(new KafkaOptions { ClusterProfileDataPath = directory });
+
+        var newClusterProfile = new ClusterProfile
+        {
+            ClusterName = "UpdatedCluster",
+            BootstrapServers = "localhost:9093"
+        };
+
+        // Act
+        var result = _clusterProfileService.Update(clusterName, newClusterProfile);
+
+        // Assert
+        Assert.False(result.IsSuccess);
+        Assert.False(result.Value);
+        Assert.True(result.IsFailure);
+        Assert.Equal(404, result.Failure.StatusCode);
+        Assert.Equal(ClusterProfileServiceErrorMessages.ClusterNameNotFound, result.Failure.Message);
+    }
+
+    [Fact]
+    public void Update_WithValidClusterName_UpdatesFileAndReturnsSuccess()
+    {
+        // Arrange
+        var clusterName = "TestCluster";
+        var directory = "C:\\ValidPath";
+        var path = Path.Combine(directory, string.Format(ClusterProfileFilePattern, clusterName));
+        _fileSystem.FileExists(path).Returns(true);
+        _kafkaOptions.Value.Returns(new KafkaOptions { ClusterProfileDataPath = directory });
+        _fileSystem.DirectoryExists(directory).Returns(true);
+
+        var newClusterProfile = new ClusterProfile
+        {
+            ClusterName = "UpdatedCluster",
+            BootstrapServers = "localhost:9093"
+        };
+
+        // Act
+        var result = _clusterProfileService.Update(clusterName, newClusterProfile);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.True(result.Value);
+        Assert.False(result.IsFailure);
+        _fileSystem.Received(1).WriteAllText(
+            path,
+            Arg.Do<string>(json =>
+            {
+                var deserialized = JsonSerializer.Deserialize<ClusterProfile>(json);
+                Assert.Equal(newClusterProfile.ClusterName, deserialized.ClusterName);
+                Assert.Equal(newClusterProfile.BootstrapServers, deserialized.BootstrapServers);
+            }));
+    }
 
     #endregion
 

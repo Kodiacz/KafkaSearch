@@ -94,17 +94,17 @@ public class ClusterProfileService : IClusterProfileService
 		throw new NotImplementedException();
 	}
 
-	public OperationResult<bool> Update(string clusterName, ClusterProfile clusterProfile)
+	public OperationResult<bool> Update(string existingClusterName, ClusterProfile NewClusterProfile)
 	{
-        if (string.IsNullOrWhiteSpace(clusterName))
+        if (string.IsNullOrWhiteSpace(existingClusterName))
             return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.InvalidClusterName));
 
-        if (!ValidateClusterProfile(clusterProfile))
+        if (!ValidateClusterProfile(NewClusterProfile))
         {
             return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.InvalidClusterProfile));
         }
 
-        var pathResult = CreatePath(clusterName);
+        var pathResult = CreatePath(existingClusterName);
 
         if (pathResult.IsFailure)
             return OperationResult.Fail<bool>(pathResult.Failure);
@@ -112,7 +112,7 @@ public class ClusterProfileService : IClusterProfileService
         if (!_fileSystem.FileExists(pathResult.Value!))
             return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.ClusterNameNotFound, 404));
 
-        var json = JsonSerializer.Serialize(clusterProfile, new JsonSerializerOptions()
+        var json = JsonSerializer.Serialize(NewClusterProfile, new JsonSerializerOptions()
         {
             WriteIndented = true,
         });
@@ -142,7 +142,7 @@ public class ClusterProfileService : IClusterProfileService
         var directory = _kafkaOptions.Value.ClusterProfileDataPath;
 
         if (_fileSystem.DirectoryExists(directory) == false)
-            return OperationResult.Fail<string>(Failure.Validation(ClusterProfileServiceErrorMessages.InvalidDirectory));
+            return OperationResult.Fail<string>(Failure.Validation(ClusterProfileServiceErrorMessages.InvalidDirectory, 404));
 
         return OperationResult.Ok(Path.Combine(directory, string.Format(ClusterProfileFilePattern, clusterName)));
     }

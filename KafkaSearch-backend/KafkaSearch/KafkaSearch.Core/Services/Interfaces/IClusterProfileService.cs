@@ -7,7 +7,7 @@ public interface IClusterProfileService
 {
     OperationResult<bool> Create(ClusterProfile clusterProfile);
     OperationResult<bool> Delete(string clusterName);
-    OperationResult<bool> Update(string clusterName, ClusterProfile clusterProfile);
+    OperationResult<bool> Update(string existingClusterName, ClusterProfile NewClusterProfile);
     OperationResult<ClusterProfile> GetByName(string clusterName);
     OperationResult<ClusterProfile[]> GetAll();
 }
