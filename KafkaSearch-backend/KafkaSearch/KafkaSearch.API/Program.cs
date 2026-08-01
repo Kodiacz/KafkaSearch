@@ -1,3 +1,4 @@
+using KafkaSearch.API;
 using KafkaSearch.API.BacgroundServices;
 using KafkaSearch.API.Infrastructure;
 using KafkaSearch.Core.Abstractions;
@@ -15,8 +16,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddHostedService<AppStartupService>();
 
-builder.Services.AddSingleton<IFileSystem, FileSystem>();
-builder.Services.AddScoped<IClusterProfileService, ClusterProfileService>();
+builder.Services.AddKafkaSearchServices();
 
 builder.Services.AddOptions<KafkaOptions>()
 	.BindConfiguration("KafkaOptions")

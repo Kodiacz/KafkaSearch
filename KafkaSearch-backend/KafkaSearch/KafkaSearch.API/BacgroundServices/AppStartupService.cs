@@ -10,7 +10,7 @@ public class AppStartupService(
     IOptions<KafkaOptions> kafkaOptions,
     IClusterProfileService clusterProfileService,
     IKafkaConnectionService kafkaConnectionService,
-    ILogger logger) : IHostedService
+    ILogger<AppStartupService> logger) : IHostedService
 {
     public Task StartAsync(CancellationToken cancellationToken)
     {

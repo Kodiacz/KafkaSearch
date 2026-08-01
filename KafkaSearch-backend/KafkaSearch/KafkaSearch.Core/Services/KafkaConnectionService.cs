@@ -6,7 +6,7 @@ using KafkaSearch.Core.Models;
 using KafkaSearch.Core.Services.Interfaces;
 using System.Collections.Concurrent;
 
-internal class KafkaConnectionService : IKafkaConnectionService
+public class KafkaConnectionService : IKafkaConnectionService
 {
     private ConcurrentDictionary<string, IAdminClient> _adminClientCache = new();
     private IClusterProfileService _clusterProfileService;
@@ -34,7 +34,8 @@ internal class KafkaConnectionService : IKafkaConnectionService
 
     public OperationResult<IAdminClient> GetOrCreateAdminClient(string clusterName)
     {
-        _adminClientCache.TryGetValue(clusterName, out var existingClient);
+        if (_adminClientCache.TryGetValue(clusterName, out var existingClient))
+            return OperationResult.Ok(existingClient);
 
         var profileResult = _clusterProfileService.GetByName(clusterName);
 
