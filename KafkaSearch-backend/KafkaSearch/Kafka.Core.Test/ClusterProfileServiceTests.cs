@@ -107,6 +107,17 @@ public class ClusterProfileServiceTests : IDisposable
         Assert.Equal(ClusterProfileServiceErrorMessages.AlreadyExists, result.Failure.Message);
     }
 
+    [Theory]
+    [InlineData("INT-")]
+    [InlineData("INT-ClusterProfile")]
+    [InlineData("INT-ClusterProfile.jsonc")]
+    [InlineData("INT-ClusterProfile.txt")]
+    [InlineData("INT-ClusterProfile.wodija")]
+    public void Create_WithIncorectClusterName_ReturnsNormalizedClusterName(string clusterName)
+    {
+        
+    }
+
     [Fact]
     public void Create_CreatesJson_ReturnsSuccess()
     {

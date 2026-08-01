@@ -2,6 +2,7 @@
 
 using KafkaSearch.Core.Abstractions;
 using KafkaSearch.Core.Common;
+using KafkaSearch.Core.Extensions;
 using KafkaSearch.Core.Models;
 using KafkaSearch.Core.Options;
 using KafkaSearch.Core.Services.Interfaces;
@@ -122,7 +123,8 @@ public class ClusterProfileService : IClusterProfileService
         if (string.IsNullOrWhiteSpace(existingClusterName))
             return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.InvalidClusterName));
 
-        if (!ValidateClusterProfile(NewClusterProfile))
+        var (isValid, message) = ValidateClusterProfile(NewClusterProfile);
+        if (!isValid)
         {
             return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.InvalidClusterProfile));
         }
@@ -149,13 +151,25 @@ public class ClusterProfileService : IClusterProfileService
         return result;
     }
 
-	private bool ValidateClusterProfile(ClusterProfile clusterProfile)
+	private (bool, string) ValidateClusterProfile(ClusterProfile clusterProfile)
     {
-        if (clusterProfile == null) return false;
+        if (clusterProfile == null) return (false, "Cluster profile cannot be null.");
 
-        if (string.IsNullOrWhiteSpace(clusterProfile.ClusterName)) return false;
+        if (string.IsNullOrWhiteSpace(clusterProfile.BootstrapServers)) return (false, "Bootstrap servers cannot be null or whitespace.");
+        var (isValid, message) = ClusterProfileExtensions.IsClusterProfileNameValid(clusterProfile.ClusterName);
+        if (!isValid) return (false, message);
 
-        if (string.IsNullOrWhiteSpace(clusterProfile.BootstrapServers)) return false;
+        return (true, string.Empty);
+    }
+
+    private static bool IsValidClusterName(string clusterName)
+    {
+        if (string.IsNullOrWhiteSpace(clusterName)) return false;
+        if (clusterName.Length > 64) return false;
+
+        foreach (var c in clusterName)
+            if (!char.IsLetterOrDigit(c) && c != '-' && c != '_')
+                return false;
 
         return true;
     }
