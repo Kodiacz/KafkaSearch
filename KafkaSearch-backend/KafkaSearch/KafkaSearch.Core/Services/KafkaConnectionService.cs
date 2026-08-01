@@ -5,11 +5,10 @@ using KafkaSearch.Core.Common;
 using KafkaSearch.Core.Models;
 using KafkaSearch.Core.Services.Interfaces;
 using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
 
 internal class KafkaConnectionService : IKafkaConnectionService
 {
-    private ConcurrentDictionary<string, IAdminClient> _admincClientCache;
+    private ConcurrentDictionary<string, IAdminClient> _adminClientCache = new();
     private IClusterProfileService _clusterProfileService;
 
     public KafkaConnectionService(IClusterProfileService clusterProfileService)
@@ -29,13 +28,13 @@ internal class KafkaConnectionService : IKafkaConnectionService
                 BootstrapServers = clusterProfile.BootstrapServers
             }).Build();
 
-            _admincClientCache.TryAdd(clusterProfile.ClusterName, client);
+            _adminClientCache.TryAdd(clusterProfile.ClusterName, client);
         });
     }
 
     public OperationResult<IAdminClient> GetOrCreateAdminClient(string clusterName)
     {
-        _admincClientCache.TryGetValue(clusterName, out var existingClient);
+        _adminClientCache.TryGetValue(clusterName, out var existingClient);
 
         var profileResult = _clusterProfileService.GetByName(clusterName);
 
@@ -49,7 +48,7 @@ internal class KafkaConnectionService : IKafkaConnectionService
                 BootstrapServers = profileResult.Value!.BootstrapServers
             }).Build();
 
-            _admincClientCache.TryAdd(profileResult.Value.ClusterName, client);
+            _adminClientCache.TryAdd(profileResult.Value.ClusterName, client);
             return client;
         });
     }
