@@ -1,13 +1,4 @@
-﻿using KafkaSearch.Core.Abstractions;
-using KafkaSearch.Core.Models;
-using KafkaSearch.Core.Options;
-using KafkaSearch.Core.Services;
-using Microsoft.Extensions.Options;
-using NSubstitute;
-using System.Text.Json;
-using static KafkaSearch.Core.Services.ClusterProfileService;
-
-namespace Kafka.Core.Test;
+﻿namespace Kafka.Core.Test;
 
 public class ClusterProfileServiceTests : IDisposable
 {

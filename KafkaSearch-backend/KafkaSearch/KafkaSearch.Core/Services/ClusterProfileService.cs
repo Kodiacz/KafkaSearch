@@ -86,13 +86,36 @@ public class ClusterProfileService : IClusterProfileService
 
 	public OperationResult<ClusterProfile[]> GetAll()
 	{
-		throw new NotImplementedException();
-	}
+        var directory = _kafkaOptions.Value.ClusterProfileDataPath;
+
+        if (!_fileSystem.DirectoryExists(directory))
+            return OperationResult.Fail<ClusterProfile[]>(Failure.Validation(ClusterProfileServiceErrorMessages.InvalidDirectory));
+
+        return OperationResult.Try(() =>
+        {
+            var files = _fileSystem.GetFiles(directory, "*.json");
+
+            return files
+                .Select(file => JsonSerializer.Deserialize<ClusterProfile>(_fileSystem.ReadAllText(file))!)
+                .ToArray();
+        });
+    }
 
 	public OperationResult<ClusterProfile> GetByName(string clusterName)
 	{
-		throw new NotImplementedException();
-	}
+        var directory = _kafkaOptions.Value.ClusterProfileDataPath;
+
+        if (!_fileSystem.DirectoryExists(directory))
+            return OperationResult.Fail<ClusterProfile>(Failure.Validation(ClusterProfileServiceErrorMessages.ClusterNameNotFound, 404));
+
+        var filePath = Path.Combine(directory, clusterName);
+
+        return OperationResult.Try(() =>
+        {
+            var json = _fileSystem.ReadAllText(filePath);
+            return JsonSerializer.Deserialize<ClusterProfile>(json)!;
+        });
+    }
 
 	public OperationResult<bool> Update(string existingClusterName, ClusterProfile NewClusterProfile)
 	{

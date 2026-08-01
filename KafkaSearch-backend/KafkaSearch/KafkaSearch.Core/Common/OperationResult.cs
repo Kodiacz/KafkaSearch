@@ -115,7 +115,13 @@ public readonly record struct OperationResult
 		catch (Exception ex) { return Fail(ex); }
 	}
 
-	public static async Task<OperationResult<TValue>> TryAsync<TValue>(Func<Task<TValue>> operation)
+    public static OperationResult Try(Action operation)
+    {
+        try { operation(); return Ok(); }
+        catch (Exception ex) { return Fail(ex); }
+    }
+
+    public static async Task<OperationResult<TValue>> TryAsync<TValue>(Func<Task<TValue>> operation)
 	{
 		try { return Ok(await operation().ConfigureAwait(false)); }
 		catch (Exception ex) { return Fail(ex); }
