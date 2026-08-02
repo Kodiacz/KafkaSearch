@@ -70,6 +70,7 @@ public class ClusterProfileServiceTests : IDisposable
         };
 
         // Act
+        
         var result = _clusterProfileService.Create(clusterProfile);
 
         // Assert
@@ -77,7 +78,7 @@ public class ClusterProfileServiceTests : IDisposable
         Assert.False(result.Value);
         Assert.True(result.IsFailure);
         Assert.Equal(400, result.Failure.StatusCode);
-        Assert.Equal(ClusterProfileServiceErrorMessages.InvalidClusterProfile, result.Failure.Message);
+        Assert.Equal(ClusterProfileServiceErrorMessages.InvalidClusterProfileBootStrapServers, result.Failure.Message);
     }
 
     [Fact]

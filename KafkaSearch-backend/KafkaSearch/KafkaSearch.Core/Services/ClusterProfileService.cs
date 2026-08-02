@@ -2,8 +2,8 @@
 
 using KafkaSearch.Core.Abstractions;
 using KafkaSearch.Core.Common;
-using KafkaSearch.Core.Extensions;
 using KafkaSearch.Core.Models;
+using KafkaSearch.Core.Models.Rules;
 using KafkaSearch.Core.Options;
 using KafkaSearch.Core.Services.Interfaces;
 using Microsoft.Extensions.Options;
@@ -14,6 +14,7 @@ public class ClusterProfileService : IClusterProfileService
     public static class ClusterProfileServiceErrorMessages
     {
         public const string InvalidClusterProfile = "Invalid cluster profile.";
+        public const string InvalidClusterProfileBootStrapServers = "Bootstrap servers cannot be null or whitespace.";
         public const string AlreadyExists = "Cluster profile already exists.";
         public const string InvalidClusterName = "Invalid cluster name.";
         public const string ClusterNameNotFound = "Cluster name not found.";
@@ -35,11 +36,10 @@ public class ClusterProfileService : IClusterProfileService
 
     public OperationResult<bool> Create(ClusterProfile clusterProfile)
     {
-        if (!ValidateClusterProfile(clusterProfile))
-        {
-            return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.InvalidClusterProfile));
-        }
-
+        var validationResult = Validate(clusterProfile);
+        if (validationResult.IsFailure)
+            return OperationResult.Fail<bool>(validationResult.Failure);
+        
 		var pathResult = CreatePath(clusterProfile.ClusterName);
 
         if (pathResult.IsFailure)
@@ -61,13 +61,15 @@ public class ClusterProfileService : IClusterProfileService
 		});
 
         return result;
-    }
+    
+        }
 
 	public OperationResult<bool> Delete(string clusterName)
 	{
-        if (string.IsNullOrWhiteSpace(clusterName))
-            return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.InvalidClusterName));
-        
+        var clusterNameValidation = ValidateClusterName(clusterName);
+        if (clusterNameValidation.IsFailure)
+            return OperationResult.Fail<bool>(clusterNameValidation.Failure);
+
         var pathResult = CreatePath(clusterName);
 
         if (pathResult.IsFailure)
@@ -104,12 +106,16 @@ public class ClusterProfileService : IClusterProfileService
 
 	public OperationResult<ClusterProfile> GetByName(string clusterName)
 	{
-        var directory = _kafkaOptions.Value.ClusterProfileDataPath;
+        var clusterNameValidation = ValidateClusterName(clusterName);
+        if (clusterNameValidation.IsFailure)
+            return OperationResult.Fail<ClusterProfile>(clusterNameValidation.Failure);
 
-        if (!_fileSystem.DirectoryExists(directory))
-            return OperationResult.Fail<ClusterProfile>(Failure.Validation(ClusterProfileServiceErrorMessages.ClusterNameNotFound, 404));
+        var pathResult = CreatePath(clusterName);
 
-        var filePath = Path.Combine(directory, clusterName);
+        if (pathResult.IsFailure)
+            return OperationResult.Fail<ClusterProfile>(pathResult.Failure);
+
+        var filePath = pathResult.Value!;
 
         return OperationResult.Try(() =>
         {
@@ -123,11 +129,10 @@ public class ClusterProfileService : IClusterProfileService
         if (string.IsNullOrWhiteSpace(existingClusterName))
             return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.InvalidClusterName));
 
-        var (isValid, message) = ValidateClusterProfile(NewClusterProfile);
-        if (!isValid)
-        {
-            return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.InvalidClusterProfile));
-        }
+        var validationResult = Validate(NewClusterProfile);
+
+        if (validationResult.IsFailure)
+            return OperationResult.Fail<bool>(validationResult.Failure);
 
         var pathResult = CreatePath(existingClusterName);
 
@@ -151,27 +156,33 @@ public class ClusterProfileService : IClusterProfileService
         return result;
     }
 
-	private (bool, string) ValidateClusterProfile(ClusterProfile clusterProfile)
+    private OperationResult Validate(ClusterProfile profile)
     {
-        if (clusterProfile == null) return (false, "Cluster profile cannot be null.");
+        if (profile is null)
+            return OperationResult.Fail(Failure.Validation("Cluster profile cannot be null."));
 
-        if (string.IsNullOrWhiteSpace(clusterProfile.BootstrapServers)) return (false, "Bootstrap servers cannot be null or whitespace.");
-        var (isValid, message) = ClusterProfileExtensions.IsClusterProfileNameValid(clusterProfile.ClusterName);
-        if (!isValid) return (false, message);
+        var failures = new[]
+        {
+            ClusterProfileRules.ClusterName(profile.ClusterName),
+            ClusterProfileRules.BootstrapServers(profile.BootstrapServers),
+            ClusterProfileRules.KafkaClusterVersion(profile.KafkaClusterVersion),
+            ClusterProfileRules.Zookeeper(profile.ZookeeperSettings)
+        }
+        .Where(f => f != Failure.NoFailure)
+        .ToArray();
 
-        return (true, string.Empty);
+        return failures.Length == 0
+            ? OperationResult.Ok()
+            : OperationResult.Fail(Failure.Merge(failures));
     }
 
-    private static bool IsValidClusterName(string clusterName)
+    private OperationResult ValidateClusterName(string clusterName)
     {
-        if (string.IsNullOrWhiteSpace(clusterName)) return false;
-        if (clusterName.Length > 64) return false;
+            var clusterNameValidation = ClusterProfileRules.ClusterName(clusterName);
+        if (clusterNameValidation.Type != FailureType.None)
+            return OperationResult.Fail(clusterNameValidation);
 
-        foreach (var c in clusterName)
-            if (!char.IsLetterOrDigit(c) && c != '-' && c != '_')
-                return false;
-
-        return true;
+        return OperationResult.Ok();
     }
 
     private OperationResult<string> CreatePath(string clusterName)

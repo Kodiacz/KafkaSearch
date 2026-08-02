@@ -11,6 +11,6 @@ public class ClusterProfileUtils
             return Failure.Validation("ClusterName cannot be null or empty.");
         if (string.IsNullOrWhiteSpace(profile.BootstrapServers))
             return Failure.Validation("BootstrapServers cannot be null or empty.");
-        return null; // No validation errors
+        return Failure.NoFailure;
     };
 }
