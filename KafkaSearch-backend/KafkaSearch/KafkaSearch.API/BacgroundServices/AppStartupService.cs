@@ -42,7 +42,11 @@ public class AppStartupService(
         }
 
         foreach (var profile in profilesResult.Value)
-            kafkaConnectionService.CreateAdminClient(profile);
+        {
+            var operationResult = kafkaConnectionService.CreateAdminClient(profile);
+            if (operationResult.IsFailure)
+                logger.LogError($"Failed to create admin cline for {profile.ClusterName}: error message {operationResult.Failure.Message}");
+        }
 
         return Task.CompletedTask;
     }
