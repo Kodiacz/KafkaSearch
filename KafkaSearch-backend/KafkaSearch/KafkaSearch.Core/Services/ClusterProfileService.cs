@@ -13,7 +13,7 @@ public class ClusterProfileService : IClusterProfileService
 {
     public static class ClusterProfileServiceErrorMessages
     {
-        public const string InvalidClusterProfile = "Invalid cluster profile.";
+        public const string InvalidClusterProfile = "Cluster profile cannot be null.";
         public const string InvalidClusterProfileBootStrapServers = "Bootstrap servers cannot be null or whitespace.";
         public const string AlreadyExists = "Cluster profile already exists.";
         public const string InvalidClusterName = "Invalid cluster name.";
@@ -126,8 +126,9 @@ public class ClusterProfileService : IClusterProfileService
 
 	public OperationResult<bool> Update(string existingClusterName, ClusterProfile NewClusterProfile)
 	{
-        if (string.IsNullOrWhiteSpace(existingClusterName))
-            return OperationResult.Fail<bool>(Failure.Validation(ClusterProfileServiceErrorMessages.InvalidClusterName));
+        var clusterNameValidation = ValidateClusterName(existingClusterName);
+        if (clusterNameValidation.IsFailure)
+            return OperationResult.Fail<bool>(clusterNameValidation.Failure);
 
         var validationResult = Validate(NewClusterProfile);
 
@@ -159,7 +160,7 @@ public class ClusterProfileService : IClusterProfileService
     private OperationResult Validate(ClusterProfile profile)
     {
         if (profile is null)
-            return OperationResult.Fail(Failure.Validation("Cluster profile cannot be null."));
+            return OperationResult.Fail(Failure.Validation(ClusterProfileServiceErrorMessages.InvalidClusterProfile));
 
         var failures = new[]
         {

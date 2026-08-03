@@ -1,4 +1,6 @@
-﻿namespace Kafka.Core.Test;
+﻿using KafkaSearch.Core.Models.Rules;
+
+namespace Kafka.Core.Test;
 
 public class ClusterProfileServiceTests : IDisposable
 {
@@ -33,15 +35,20 @@ public class ClusterProfileServiceTests : IDisposable
     }
 
     [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    [InlineData(null)]
-    public void Create_WithInvalidClusterName_ReturnsValidationFailure(string clusterName)
+    [InlineData(null, ClusterProfileRules.ClusterNameRequired)]
+    [InlineData("", ClusterProfileRules.ClusterNameRequired)]
+    [InlineData("   ", ClusterProfileRules.ClusterNameRequired)]
+    [InlineData("Test$Test", ClusterProfileRules.ClusterNameInvalidCharacters)]
+    [InlineData("Test.Test", ClusterProfileRules.ClusterNameInvalidCharacters)]
+    [InlineData("TestTest.jsonc", ClusterProfileRules.ClusterNameInvalidCharacters)]
+    [InlineData("Test-ClusterProfile", ClusterProfileRules.ClusterNameCannotEndWithClusterProfile)]
+    [InlineData("TestClusterProfile", ClusterProfileRules.ClusterNameCannotEndWithClusterProfile)]
+    public void Create_WithInvalidClusterName_ReturnsValidationFailure(string invalidClusterName, string expectedErrorMessage)
     {
         // Arrange
         var clusterProfile = new ClusterProfile
         {
-            ClusterName = clusterName,
+            ClusterName = invalidClusterName,
             BootstrapServers = "localhost:9092"
         };
 
@@ -53,14 +60,15 @@ public class ClusterProfileServiceTests : IDisposable
         Assert.False(result.Value);
         Assert.True(result.IsFailure);
         Assert.Equal(400, result.Failure.StatusCode);
-        Assert.Equal(ClusterProfileServiceErrorMessages.InvalidClusterProfile, result.Failure.Message);
+        Assert.Equal(expectedErrorMessage, result.Failure.Message);
     }
 
     [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    [InlineData(null)]
-    public void Create_WithInvalidClusterBootstrapServers_ReturnsValidationFailure(string bootstrapServers)
+    [InlineData(null, ClusterProfileRules.BootstrapServersRequired)]
+    [InlineData("", ClusterProfileRules.BootstrapServersRequired)]
+    [InlineData("   ", ClusterProfileRules.BootstrapServersRequired)]
+    [InlineData("loca lhost:9092", ClusterProfileRules.BootstrapServersWhitespace)]
+    public void Create_WithInvalidClusterBootstrapServers_ReturnsValidationFailure(string bootstrapServers, string expectedErrorMessage)
     {
         // Arrange
         var clusterProfile = new ClusterProfile
@@ -78,7 +86,7 @@ public class ClusterProfileServiceTests : IDisposable
         Assert.False(result.Value);
         Assert.True(result.IsFailure);
         Assert.Equal(400, result.Failure.StatusCode);
-        Assert.Equal(ClusterProfileServiceErrorMessages.InvalidClusterProfileBootStrapServers, result.Failure.Message);
+        Assert.Equal(expectedErrorMessage, result.Failure.Message);
     }
 
     [Fact]
@@ -157,10 +165,15 @@ public class ClusterProfileServiceTests : IDisposable
     #region Delete
 
     [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    [InlineData(null)]
-    public void Delete_WithInvalidClusterName_ReturnsValidationFailure(string wrongClusterName)
+    [InlineData(null, ClusterProfileRules.ClusterNameRequired)]
+    [InlineData("", ClusterProfileRules.ClusterNameRequired)]
+    [InlineData("   ", ClusterProfileRules.ClusterNameRequired)]
+    [InlineData("Test$Test", ClusterProfileRules.ClusterNameInvalidCharacters)]
+    [InlineData("Test.Test", ClusterProfileRules.ClusterNameInvalidCharacters)]
+    [InlineData("TestTest.jsonc", ClusterProfileRules.ClusterNameInvalidCharacters)]
+    [InlineData("Test-ClusterProfile", ClusterProfileRules.ClusterNameCannotEndWithClusterProfile)]
+    [InlineData("TestClusterProfile", ClusterProfileRules.ClusterNameCannotEndWithClusterProfile)]
+    public void Delete_WithInvalidClusterName_ReturnsValidationFailure(string wrongClusterName, string expectedClusterName)
     {
         // Act
         var result = _clusterProfileService.Delete(wrongClusterName);
@@ -170,7 +183,7 @@ public class ClusterProfileServiceTests : IDisposable
         Assert.False(result.Value);
         Assert.True(result.IsFailure);
         Assert.Equal(400, result.Failure.StatusCode);
-        Assert.Equal(ClusterProfileServiceErrorMessages.InvalidClusterName, result.Failure.Message);
+        Assert.Equal(expectedClusterName, result.Failure.Message);
     }
 
     [Fact]
@@ -256,10 +269,15 @@ public class ClusterProfileServiceTests : IDisposable
     }
 
     [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    [InlineData(null)]
-    public void Update_WithInvalidClusterName_ReturnsValidationFailure(string invalidClusterName)
+    [InlineData("", ClusterProfileRules.ClusterNameRequired)]
+    [InlineData("   ", ClusterProfileRules.ClusterNameRequired)]
+    [InlineData(null, ClusterProfileRules.ClusterNameRequired)]
+    [InlineData("Test$Test", ClusterProfileRules.ClusterNameInvalidCharacters)]
+    [InlineData("Test.Test", ClusterProfileRules.ClusterNameInvalidCharacters)]
+    [InlineData("TestTest.jsonc", ClusterProfileRules.ClusterNameInvalidCharacters)]
+    [InlineData("Test-ClusterProfile", ClusterProfileRules.ClusterNameCannotEndWithClusterProfile)]
+    [InlineData("TestClusterProfile", ClusterProfileRules.ClusterNameCannotEndWithClusterProfile)]
+    public void Update_WithInvalidClusterName_ReturnsValidationFailure(string invalidClusterName, string expectedErrorMessage)
     {
         // Arrange
         var clusterProfile = new ClusterProfile
@@ -276,7 +294,7 @@ public class ClusterProfileServiceTests : IDisposable
         Assert.False(result.Value);
         Assert.True(result.IsFailure);
         Assert.Equal(400, result.Failure.StatusCode);
-        Assert.Equal(ClusterProfileServiceErrorMessages.InvalidClusterName, result.Failure.Message);
+        Assert.Equal(expectedErrorMessage, result.Failure.Message);
     }
 
     [Fact]
