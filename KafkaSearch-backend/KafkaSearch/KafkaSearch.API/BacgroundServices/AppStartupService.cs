@@ -42,7 +42,7 @@ public class AppStartupService(
         }
 
         foreach (var profile in profilesResult.Value)
-            kafkaConnectionService.GetOrCreateAdminClient(profile.ClusterName);
+            kafkaConnectionService.CreateAdminClient(profile);
 
         return Task.CompletedTask;
     }

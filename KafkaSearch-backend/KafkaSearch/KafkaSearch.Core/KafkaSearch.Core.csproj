@@ -11,4 +11,9 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.9" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Utils\" />
+    <Folder Include="Validations\" />
+  </ItemGroup>
+
 </Project>

@@ -1,4 +1,5 @@
-﻿using KafkaSearch.Core.Models;
+﻿using KafkaSearch.API.Contracts.Requests;
+using KafkaSearch.Core.Models;
 using KafkaSearch.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -56,9 +57,10 @@ public class ClusterProfileController : ControllerBase
     }
 
     [HttpPut("{existingClusterName}")]
-    public IActionResult Update([FromRoute] string existingClusterName, [FromBody] ClusterProfile newClusterProfile)
+    public IActionResult Update([FromRoute] string existingClusterName, [FromBody] UpdateClusterProfileRequest updateClusterProfileRequest)
     {
-        var result = _clusterProfileService.Update(existingClusterName, newClusterProfile);
+        var result = _clusterProfileService
+            .Update(existingClusterName, updateClusterProfileRequest.ToClusterProfile(existingClusterName));
 
         if (result.IsFailure)
             return result.Failure.IsValidation

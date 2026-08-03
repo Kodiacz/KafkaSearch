@@ -1,11 +1,6 @@
 {
-  "ClusterName": "INT-Updated",
-  "BootstrapServers": "172.17.52.222",
+  "ClusterName": "int",
+  "BootstrapServers": "172.17.58.130",
   "KafkaClusterVersion": null,
-  "ZookeeperSettings": {
-    "EnableZookeeperAccess": true,
-    "Host": "",
-    "Port": "",
-    "ChrootPath": null
-  }
+  "ZookeeperSettings": null
 }

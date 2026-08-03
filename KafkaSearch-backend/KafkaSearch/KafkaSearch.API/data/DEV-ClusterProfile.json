@@ -1,11 +1,6 @@
 {
-  "ClusterName": "DEV-Updated",
-  "BootstrapServers": "172.17.52.222",
+  "ClusterName": "dev",
+  "BootstrapServers": "172.17.42.216",
   "KafkaClusterVersion": null,
-  "ZookeeperSettings": {
-    "EnableZookeeperAccess": true,
-    "Host": "",
-    "Port": "",
-    "ChrootPath": null
-  }
+  "ZookeeperSettings": null
 }

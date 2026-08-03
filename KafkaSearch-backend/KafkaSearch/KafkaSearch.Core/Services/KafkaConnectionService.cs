@@ -6,7 +6,7 @@ using KafkaSearch.Core.Models;
 using KafkaSearch.Core.Services.Interfaces;
 using System.Collections.Concurrent;
 
-public class KafkaConnectionService : IKafkaConnectionService
+public class KafkaConnectionService : IKafkaConnectionService, IDisposable
 {
     private ConcurrentDictionary<string, IAdminClient> _adminClientCache = new();
     private IClusterProfileService _clusterProfileService;
@@ -57,5 +57,13 @@ public class KafkaConnectionService : IKafkaConnectionService
     public void InvalidateConnection(string clusterName)
     {
         throw new NotImplementedException();
+    }
+
+    public void Dispose()
+    {
+        foreach (var client in _adminClientCache.Values)
+        {
+            client.Dispose();
+        }
     }
 }

@@ -15,4 +15,8 @@
     <ProjectReference Include="..\KafkaSearch.Core\KafkaSearch.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Contracts\Responses\" />
+  </ItemGroup>
+
 </Project>
