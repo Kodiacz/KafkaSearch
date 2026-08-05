@@ -45,7 +45,7 @@ public class AppStartupService(
         {
             var operationResult = kafkaConnectionService.GetOrCreateAdminClient(profile);
             if (operationResult.IsFailure)
-                logger.LogError($"Failed to create admin cline for {profile.ClusterName}: error message {operationResult.Failure.Message}");
+                logger.LogError(operationResult.Failure.Message);
         }
 
         return Task.CompletedTask;
