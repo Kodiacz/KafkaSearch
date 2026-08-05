@@ -7,13 +7,17 @@ namespace KafkaSearch.API.Controllers;
 
 [ApiController]
 [Route("api/cluster-profiles")]
-public class ClusterProfileController : ControllerBase
+public class ClusterProfilesController : ControllerBase
 {
     private readonly IClusterProfileService _clusterProfileService;
+    private readonly IKafkaConnectionService _kafkaConnectionService;
 
-    public ClusterProfileController(IClusterProfileService clusterProfileService)
+    public ClusterProfilesController(
+        IClusterProfileService clusterProfileService, 
+        IKafkaConnectionService kafkaConnectionService)
     {
         _clusterProfileService = clusterProfileService;
+        _kafkaConnectionService = kafkaConnectionService;
     }
 
     [HttpGet]
@@ -81,5 +85,18 @@ public class ClusterProfileController : ControllerBase
                 : StatusCode(500, result.Failure.Message);
 
         return NoContent();
+    }
+
+    [HttpPost("{clusterName}/test-connection")]
+    public IActionResult TestConnection([FromRoute] string clusterName)
+    {
+        var result = _kafkaConnectionService.GetAdminClientMetadata(clusterName);
+
+        if (result.IsFailure)
+            return result.Failure.IsValidation
+                ? BadRequest(result.Failure.Message)
+                : StatusCode(500, result.Failure.Message);
+
+        return Ok();
     }
 }

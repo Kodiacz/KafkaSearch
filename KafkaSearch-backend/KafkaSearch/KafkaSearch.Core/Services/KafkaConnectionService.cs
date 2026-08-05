@@ -67,6 +67,15 @@ public class KafkaConnectionService : IKafkaConnectionService, IDisposable
         return OperationResult.Try(() => client.GetMetadata(_metadataTimeout));
     }
 
+    public OperationResult TestConnection(string clusterName)
+    {
+        if (!_adminClientCache.TryGetValue(clusterName, out var client))
+            return OperationResult.Fail(
+                Failure.Operation($"Admin client for cluster '{clusterName}' does not exist.", 404));
+
+        return Verify(client);
+    }
+
     private OperationResult Verify(IAdminClient client)
-    => OperationResult.Try(() => client.GetMetadata(_metadataTimeout));
+        => OperationResult.Try(() => client.GetMetadata(_metadataTimeout));
 }
