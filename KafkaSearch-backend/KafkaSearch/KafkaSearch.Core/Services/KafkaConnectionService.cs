@@ -15,9 +15,9 @@ public class KafkaConnectionService : IKafkaConnectionService, IDisposable
     private TimeSpan _metadataTimeout = TimeSpan.FromSeconds(5);
 
     public KafkaConnectionService(
-        IClusterProfileService clusterProfileService, 
-        IKafkaClientFactory kafkaClientFactory) 
-    { 
+        IClusterProfileService clusterProfileService,
+        IKafkaClientFactory kafkaClientFactory)
+    {
         _kafkaClientFactory = kafkaClientFactory;
     }
 
@@ -60,6 +60,21 @@ public class KafkaConnectionService : IKafkaConnectionService, IDisposable
     {
         foreach (var client in _adminClientCache.Values)
             client.Dispose();
+    }
+
+    public OperationResult<Metadata> GetAdminClientMetaDeta(string clusterName)
+    {
+        if (!_adminClientCache.TryGetValue(clusterName, out var client))
+            return OperationResult.Fail(Failure.Operation($"Adminc client for cluster {clusterName} does not exist"));
+
+        var clientResult = OperationResult.Try<Metadata?>(() => client.GetMetadata(_metadataTimeout));
+
+        if (clientResult.IsFailure || clientResult.Value is null)
+            return clientResult.IsFailure
+                ? OperationResult.Fail(clientResult.Failure)
+                : OperationResult.Fail(Failure.Operation($"something went wrong while trying to get clients metedata for {clusterName}"));
+
+        return OperationResult.Ok(clientResult.Value!);
     }
 
     private OperationResult Verify(IAdminClient client)
