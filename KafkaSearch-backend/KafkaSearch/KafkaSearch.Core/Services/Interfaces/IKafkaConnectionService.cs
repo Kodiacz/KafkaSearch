@@ -6,7 +6,6 @@ using KafkaSearch.Core.Models;
 
 public interface IKafkaConnectionService
 {
-    OperationResult CreateAdminClient(ClusterProfile clusterProfile);
-    OperationResult<IAdminClient> GetOrCreateAdminClient(string clusterName);
+    OperationResult<IAdminClient> GetOrCreateAdminClient(ClusterProfile clusterProfile);
     void InvalidateConnection(string clusterName);
 }

@@ -9,19 +9,18 @@ using System.Collections.Concurrent;
 public class KafkaConnectionService : IKafkaConnectionService, IDisposable
 {
     private ConcurrentDictionary<string, IAdminClient> _adminClientCache = new();
-    private IClusterProfileService _clusterProfileService;
 
-    public KafkaConnectionService(IClusterProfileService clusterProfileService)
-    {
-        _clusterProfileService = clusterProfileService;
-    }
+    public KafkaConnectionService(IClusterProfileService clusterProfileService) { }
 
-    public OperationResult CreateAdminClient(ClusterProfile clusterProfile)
+    public OperationResult<IAdminClient> GetOrCreateAdminClient(ClusterProfile clusterProfile)
     {
-        if (clusterProfile == null) 
+        if (clusterProfile == null)
             return OperationResult.Fail(new ArgumentNullException(nameof(clusterProfile), "Cluster profile cannot be null"));
 
-        return OperationResult.Try(() =>
+        if (_adminClientCache.TryGetValue(clusterProfile.ClusterName, out var existingClient))
+            return OperationResult.Ok(existingClient);
+
+        return OperationResult.Try<IAdminClient>(() =>
         {
             var client = new AdminClientBuilder(new AdminClientConfig
             {
@@ -29,27 +28,6 @@ public class KafkaConnectionService : IKafkaConnectionService, IDisposable
             }).Build();
 
             _adminClientCache.TryAdd(clusterProfile.ClusterName, client);
-        });
-    }
-
-    public OperationResult<IAdminClient> GetOrCreateAdminClient(string clusterName)
-    {
-        if (_adminClientCache.TryGetValue(clusterName, out var existingClient))
-            return OperationResult.Ok(existingClient);
-
-        var profileResult = _clusterProfileService.GetByName(clusterName);
-
-        if (profileResult.IsFailure)
-            return OperationResult.Fail<IAdminClient>(profileResult.Failure);
-
-        return OperationResult.Try<IAdminClient>(() =>
-        {
-            var client = new AdminClientBuilder(new AdminClientConfig
-            {
-                BootstrapServers = profileResult.Value!.BootstrapServers
-            }).Build();
-
-            _adminClientCache.TryAdd(profileResult.Value.ClusterName, client);
             return client;
         });
     }
