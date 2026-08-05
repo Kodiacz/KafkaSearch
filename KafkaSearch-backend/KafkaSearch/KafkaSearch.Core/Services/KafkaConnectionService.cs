@@ -40,8 +40,6 @@ public class KafkaConnectionService : IKafkaConnectionService, IDisposable
     public void Dispose()
     {
         foreach (var client in _adminClientCache.Values)
-        {
             client.Dispose();
-        }
     }
 }
