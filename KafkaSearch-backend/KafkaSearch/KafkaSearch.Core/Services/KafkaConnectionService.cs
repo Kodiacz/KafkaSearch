@@ -23,31 +23,27 @@ public class KafkaConnectionService : IKafkaConnectionService, IDisposable
 
     public OperationResult<IAdminClient> GetOrCreateAdminClient(ClusterProfile clusterProfile)
     {
-        if (clusterProfile == null)
-            return OperationResult.Fail(new ArgumentNullException(nameof(clusterProfile), "Cluster profile cannot be null"));
+        if (clusterProfile is null)
+            return OperationResult.Fail<IAdminClient>(Failure.Validation("Cluster profile cannot be null."));
 
         if (_adminClientCache.TryGetValue(clusterProfile.ClusterName, out var existingClient))
             return OperationResult.Ok(existingClient);
 
-        var result = OperationResult.Try<IAdminClient>(() =>
+        var buildResult = OperationResult.Try(() => _kafkaClientFactory.Create(clusterProfile));
+
+        if (buildResult.IsFailure)
+            return OperationResult.Fail<IAdminClient>(buildResult.Failure);
+
+        var client = buildResult.Value!;
+        var verified = Verify(client);
+
+        if (verified.IsFailure)
         {
-            var client = _kafkaClientFactory.Create(clusterProfile);
-            var verified = Verify(client);
+            client.Dispose();
+            return OperationResult.Fail<IAdminClient>(verified.Failure);
+        }
 
-            if (verified.IsFailure)
-            {
-                client.Dispose();
-                return null;
-            }
-
-            _adminClientCache.TryAdd(clusterProfile.ClusterName, client);
-            return client;
-        });
-
-        if (result.IsFailure || result.Value is null)
-            return OperationResult.Fail(Failure.Operation($"Failed to create or verify admin client for cluster '{clusterProfile.ClusterName}'"));
-
-        return result;
+        return OperationResult.Ok(_adminClientCache.GetOrAdd(clusterProfile.ClusterName, client));
     }
 
     public void InvalidateConnection(string clusterName)
@@ -62,19 +58,13 @@ public class KafkaConnectionService : IKafkaConnectionService, IDisposable
             client.Dispose();
     }
 
-    public OperationResult<Metadata> GetAdminClientMetaDeta(string clusterName)
+    public OperationResult<Metadata> GetAdminClientMetadata(string clusterName)
     {
         if (!_adminClientCache.TryGetValue(clusterName, out var client))
-            return OperationResult.Fail(Failure.Operation($"Adminc client for cluster {clusterName} does not exist"));
+            return OperationResult.Fail<Metadata>(
+                Failure.Operation($"Admin client for cluster '{clusterName}' does not exist.", 404));
 
-        var clientResult = OperationResult.Try<Metadata?>(() => client.GetMetadata(_metadataTimeout));
-
-        if (clientResult.IsFailure || clientResult.Value is null)
-            return clientResult.IsFailure
-                ? OperationResult.Fail(clientResult.Failure)
-                : OperationResult.Fail(Failure.Operation($"something went wrong while trying to get clients metedata for {clusterName}"));
-
-        return OperationResult.Ok(clientResult.Value!);
+        return OperationResult.Try(() => client.GetMetadata(_metadataTimeout));
     }
 
     private OperationResult Verify(IAdminClient client)
