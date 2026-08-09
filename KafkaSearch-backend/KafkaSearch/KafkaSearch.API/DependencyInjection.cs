@@ -10,11 +10,11 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddKafkaSearchServices(this IServiceCollection services)
     {
-        // Register your services here
         services.AddSingleton<IClusterProfileService, ClusterProfileService>();
         services.AddSingleton<IKafkaConnectionService, KafkaConnectionService>();
-        services.AddSingleton<IFileSystem, FileSystem>();
+        services.AddSingleton<ITopicService, TopicService>();
         services.AddSingleton<IKafkaClientFactory, KafkaClientFactory>();
+        services.AddSingleton<IFileSystem, FileSystem>();
         return services;
     }
 }

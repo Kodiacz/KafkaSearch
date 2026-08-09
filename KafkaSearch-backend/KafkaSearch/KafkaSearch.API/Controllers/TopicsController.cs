@@ -1,5 +1,6 @@
 ﻿namespace KafkaSearch.API.Controllers;
 
+using KafkaSearch.API.Extensions;
 using KafkaSearch.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,32 +8,14 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/topics")]
 public class TopicsController : ControllerBase
 {
-    private readonly IKafkaConnectionService _kafkaConnectionService;
-    private readonly IClusterProfileService _clusterProfileService;
+    private ITopicService _topicService;
 
-    public TopicsController(IKafkaConnectionService kafkaConnectionService, IClusterProfileService clusterProfileService)
+    public TopicsController(ITopicService topicService)
     {
-        _kafkaConnectionService = kafkaConnectionService;
-        _clusterProfileService = clusterProfileService;
+        _topicService = topicService;   
     }
 
-    [HttpGet("/names")]
+    [HttpGet("names")]
     public IActionResult GetTopicsNames(string clusterProfile)
-    {
-        var profileResult = _clusterProfileService.GetByName(clusterProfile);
-
-        if (profileResult.IsFailure)
-            return BadRequest(profileResult.Failure.Message);
-
-        var clientResult = _kafkaConnectionService.GetAdminClientMetadata(profileResult.Value.ClusterName!);
-
-        if (clientResult.IsFailure) 
-            return BadRequest(clientResult.Failure.Message);
-
-        var adminClient = clientResult.Value!;
-
-        var topics = adminClient.Topics.Select(x => x.Topic);
-
-        return Ok(topics);
-    }
+        => _topicService.GetTopicsNames(clusterProfile).ToActionResult(this);
 }

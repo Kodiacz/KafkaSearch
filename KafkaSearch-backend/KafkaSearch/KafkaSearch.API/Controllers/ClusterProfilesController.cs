@@ -1,4 +1,5 @@
 ﻿using KafkaSearch.API.Contracts.Requests;
+using KafkaSearch.API.Extensions;
 using KafkaSearch.Core.Models;
 using KafkaSearch.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -21,33 +22,15 @@ public class ClusterProfilesController : ControllerBase
     }
 
     [HttpGet]
-    [Route("api/KafkaSearch/GetProfiles")]
+    [Route("get-profiles")]
     public IActionResult GetAll()
-    {
-        var result = _clusterProfileService.GetAll();
-
-        if (result.IsFailure)
-            return result.Failure.IsValidation
-                ? BadRequest(result.Failure.Message)
-                : StatusCode(500, result.Failure.Message);
-
-        return Ok(result.Value);
-    }
+        => _clusterProfileService.GetAll().ToActionResult(this);
 
     [HttpGet("{clusterName}")]
     public IActionResult GetByName([FromRoute] string clusterName)
-    {
-        var result = _clusterProfileService.GetByName(clusterName);
+        => _clusterProfileService.GetByName(clusterName).ToActionResult(this);
 
-        if (result.IsFailure)
-            return result.Failure.IsValidation
-                ? BadRequest(result.Failure.Message)
-                : StatusCode(500, result.Failure.Message);
-
-        return Ok(result.Value);
-    }
-
-    [HttpPost]
+    [HttpPost("create")]
     public IActionResult Create([FromBody] ClusterProfile clusterProfile)
     {
         var result = _clusterProfileService.Create(clusterProfile);
@@ -76,27 +59,11 @@ public class ClusterProfilesController : ControllerBase
 
     [HttpDelete("{clusterName}")]
     public IActionResult Delete([FromRoute] string clusterName)
-    {
-        var result = _clusterProfileService.Delete(clusterName);
-
-        if (result.IsFailure)
-            return result.Failure.IsValidation
-                ? BadRequest(result.Failure.Message)
-                : StatusCode(500, result.Failure.Message);
-
-        return NoContent();
-    }
+        => _clusterProfileService.Delete(clusterName).ToActionResult(this);
+    
 
     [HttpPost("{clusterName}/test-connection")]
     public IActionResult TestConnection([FromRoute] string clusterName)
-    {
-        var result = _kafkaConnectionService.GetAdminClientMetadata(clusterName);
-
-        if (result.IsFailure)
-            return result.Failure.IsValidation
-                ? BadRequest(result.Failure.Message)
-                : StatusCode(500, result.Failure.Message);
-
-        return Ok();
-    }
+        => _kafkaConnectionService.GetAdminClientMetadata(clusterName).ToActionResult(this);
+    
 }
