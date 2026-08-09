@@ -32,30 +32,14 @@ public class ClusterProfilesController : ControllerBase
 
     [HttpPost("create")]
     public IActionResult Create([FromBody] ClusterProfile clusterProfile)
-    {
-        var result = _clusterProfileService.Create(clusterProfile);
-
-        if (result.IsFailure)
-            return result.Failure.IsValidation
-                ? BadRequest(result.Failure.Message)
-                : StatusCode(500, result.Failure.Message);
-
-        return Created();
-    }
+        => _clusterProfileService.Create(clusterProfile).ToActionResult(this);
 
     [HttpPut("{existingClusterName}")]
     public IActionResult Update([FromRoute] string existingClusterName, [FromBody] UpdateClusterProfileRequest updateClusterProfileRequest)
-    {
-        var result = _clusterProfileService
-            .Update(existingClusterName, updateClusterProfileRequest.ToClusterProfile(existingClusterName));
-
-        if (result.IsFailure)
-            return result.Failure.IsValidation
-                ? BadRequest(result.Failure.Message)
-                : StatusCode(500, result.Failure.Message);
-
-        return Ok();
-    }
+        => _clusterProfileService
+                .Update(existingClusterName, updateClusterProfileRequest.ToClusterProfile(existingClusterName))
+                .ToActionResult(this);
+    
 
     [HttpDelete("{clusterName}")]
     public IActionResult Delete([FromRoute] string clusterName)
@@ -64,6 +48,6 @@ public class ClusterProfilesController : ControllerBase
 
     [HttpPost("{clusterName}/test-connection")]
     public IActionResult TestConnection([FromRoute] string clusterName)
-        => _kafkaConnectionService.GetAdminClientMetadata(clusterName).ToActionResult(this);
+        => _kafkaConnectionService.TestConnection(clusterName).ToActionResult(this);
     
 }
