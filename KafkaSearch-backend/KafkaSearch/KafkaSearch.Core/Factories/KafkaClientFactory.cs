@@ -13,7 +13,12 @@ public class KafkaClientFactory : IKafkaClientFactory
         }).Build();
 
     public IConsumer<byte[], byte[]> CreateConsumer(ClusterProfile profile, string groupId)
-    {
-        throw new NotImplementedException();
-    }
+        => new ConsumerBuilder<byte[], byte[]>(new ConsumerConfig
+        {
+            BootstrapServers = profile.BootstrapServers,
+            GroupId = groupId,
+            EnableAutoCommit = false,
+            AutoOffsetReset = AutoOffsetReset.Earliest,
+            EnablePartitionEof = true
+        }).Build();
 }
