@@ -11,7 +11,7 @@ public static class OperationResultExtensions
             ? controller.Ok(result.Value)
             : result.Failure.ToActionResult(controller);
 
-    public static IActionResult ToActionResult<T>(
+    public static IActionResult ToActionResult(
         this OperationResult result, ControllerBase controller)
         => result.IsSuccess
             ? controller.Ok(result)

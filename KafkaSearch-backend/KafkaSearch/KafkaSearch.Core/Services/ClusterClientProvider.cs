@@ -28,9 +28,9 @@ public class ClusterClientProvider : IClusterClientProvider
         return _kafkaConnectionService.GetOrCreateAdminClient(profile.Value!);
     }
 
-    public OperationResult<Metadata> MetadataFor(string clusterName)
+    public OperationResult<Metadata> MetadataFor(string clusterProfileName)
     {
-        var clientResult = ForCluster(clusterName);
+        var clientResult = ForCluster(clusterProfileName);
 
         if (clientResult.IsFailure)
             return OperationResult.Fail<Metadata>(clientResult.Failure);

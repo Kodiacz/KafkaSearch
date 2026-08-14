@@ -107,6 +107,7 @@ public class ClusterProfileService : IClusterProfileService
 	public OperationResult<ClusterProfile> GetByName(string clusterName)
 	{
         var clusterNameValidation = ValidateClusterName(clusterName);
+
         if (clusterNameValidation.IsFailure)
             return OperationResult.Fail<ClusterProfile>(clusterNameValidation.Failure);
 

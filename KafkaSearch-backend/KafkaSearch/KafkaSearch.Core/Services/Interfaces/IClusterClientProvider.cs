@@ -6,5 +6,5 @@ namespace KafkaSearch.Core.Services.Interfaces;
 public interface IClusterClientProvider
 {
     OperationResult<IAdminClient> ForCluster(string clusterProfileName);
-    OperationResult<Metadata> MetadataFor(string clusterName);
+    OperationResult<Metadata> MetadataFor(string clusterProfileName);
 }
