@@ -1,0 +1,506 @@
+{
+  "changeReason": "Normal",
+  "markets": [
+    {
+      "specifiers": [],
+      "marketStatus": "Active",
+      "businessUnit": "Default",
+      "isFavourite": false,
+      "marketOutcomes": [
+        {
+          "outcomeId": 100001,
+          "active": true,
+          "odds": 72.0,
+          "probability": 0.00575511364883974,
+          "businessUnitFeedConfigs": {
+            "EGTT": {
+              "odds": 63.58,
+              "probability": 0.00575511364883974,
+              "changePermit": "FEED"
+            },
+            "BHBG": {
+              "odds": 66.84,
+              "probability": 0.00575511364883974,
+              "changePermit": "FEED"
+            },
+            "DEMOIT": {
+              "odds": 63.58,
+              "probability": 0.00575511364883974,
+              "changePermit": "FEED"
+            },
+            "DEMOHR": {
+              "odds": 63.58,
+              "probability": 0.00575511364883974,
+              "changePermit": "FEED"
+            },
+            "EGTT-RETAIL": {
+              "odds": 63.58,
+              "probability": 0.00575511364883974,
+              "changePermit": "FEED"
+            }
+          },
+          "providerData": {},
+          "id": 1537936625004482561,
+          "correlationId": "sr:market:73718116:1:1"
+        },
+        {
+          "outcomeId": 100002,
+          "active": true,
+          "odds": 8.25,
+          "probability": 0.05381679082734458,
+          "businessUnitFeedConfigs": {
+            "EGTT": {
+              "odds": 7.32,
+              "probability": 0.05381679082734458,
+              "changePermit": "FEED"
+            },
+            "BHBG": {
+              "odds": 7.68,
+              "probability": 0.05381679082734458,
+              "changePermit": "FEED"
+            },
+            "DEMOIT": {
+              "odds": 7.32,
+              "probability": 0.05381679082734458,
+              "changePermit": "FEED"
+            },
+            "DEMOHR": {
+              "odds": 7.32,
+              "probability": 0.05381679082734458,
+              "changePermit": "FEED"
+            },
+            "EGTT-RETAIL": {
+              "odds": 7.32,
+              "probability": 0.05381679082734458,
+              "changePermit": "FEED"
+            }
+          },
+          "providerData": {},
+          "id": 1537936625004482562,
+          "correlationId": "sr:market:73718116:1:2"
+        },
+        {
+          "outcomeId": 100003,
+          "active": true,
+          "odds": 1.03,
+          "probability": 0.9404280955238159,
+          "businessUnitFeedConfigs": {
+            "EGTT": {
+              "odds": 1.02,
+              "probability": 0.9404280955238159,
+              "changePermit": "FEED"
+            },
+            "BHBG": {
+              "odds": 1.02,
+              "probability": 0.9404280955238159,
+              "changePermit": "FEED"
+            },
+            "DEMOIT": {
+              "odds": 1.02,
+              "probability": 0.9404280955238159,
+              "changePermit": "FEED"
+            },
+            "DEMOHR": {
+              "odds": 1.02,
+              "probability": 0.9404280955238159,
+              "changePermit": "FEED"
+            },
+            "EGTT-RETAIL": {
+              "odds": 1.02,
+              "probability": 0.9404280955238159,
+              "changePermit": "FEED"
+            }
+          },
+          "providerData": {},
+          "id": 1537936625004482563,
+          "correlationId": "sr:market:73718116:1:3"
+        }
+      ],
+      "marketTemplate": {
+        "marketTemplateOutcomes": [
+          {
+            "id": 100001,
+            "correlationId": "sr:market-template-outcome:1"
+          },
+          {
+            "id": 100002,
+            "correlationId": "sr:market-template-outcome:2"
+          },
+          {
+            "id": 100003,
+            "correlationId": "sr:market-template-outcome:3"
+          }
+        ],
+        "groups": [
+          "all",
+          "score",
+          "regular_play"
+        ],
+        "businessUnitFeedConfigs": {},
+        "id": 100001,
+        "correlationId": "sr:market-template:1"
+      },
+      "isMarketCustomBetCombinable": false,
+      "relatedMarketIdsByType": {},
+      "properties": {},
+      "relatedMarketsByType": {},
+      "providerData": {},
+      "id": 1,
+      "correlationId": "sr:market:73718116:1"
+    },
+    {
+      "specifiers": [
+        {
+          "name": "score",
+          "value": "0:2"
+        }
+      ],
+      "marketStatus": "Deactivated",
+      "businessUnit": "Default",
+      "isFavourite": true,
+      "marketOutcomes": [
+        {
+          "outcomeId": 100001,
+          "active": true,
+          "odds": 2.9,
+          "probability": 0.3095218353493767,
+          "businessUnitFeedConfigs": {
+            "EGTT": {
+              "odds": 2.84,
+              "probability": 0.3095218353493767,
+              "changePermit": "FEED"
+            },
+            "BHBG": {
+              "odds": 2.87,
+              "probability": 0.3095218353493767,
+              "changePermit": "FEED"
+            },
+            "DEMOIT": {
+              "odds": 2.84,
+              "probability": 0.3095218353493767,
+              "changePermit": "FEED"
+            },
+            "DEMOHR": {
+              "odds": 2.84,
+              "probability": 0.3095218353493767,
+              "changePermit": "FEED"
+            },
+            "EGTT-RETAIL": {
+              "odds": 2.84,
+              "probability": 0.3095218353493767,
+              "changePermit": "FEED"
+            }
+          },
+          "providerData": {},
+          "id": 1537939099119554560,
+          "correlationId": "sr:market:73718116:7:1?score\u003d0:2"
+        },
+        {
+          "outcomeId": 100002,
+          "active": true,
+          "odds": 1.95,
+          "probability": 0.46913943130477664,
+          "businessUnitFeedConfigs": {
+            "EGTT": {
+              "odds": 1.92,
+              "probability": 0.46913943130477664,
+              "changePermit": "FEED"
+            },
+            "BHBG": {
+              "odds": 1.93,
+              "probability": 0.46913943130477664,
+              "changePermit": "FEED"
+            },
+            "DEMOIT": {
+              "odds": 1.92,
+              "probability": 0.46913943130477664,
+              "changePermit": "FEED"
+            },
+            "DEMOHR": {
+              "odds": 1.92,
+              "probability": 0.46913943130477664,
+              "changePermit": "FEED"
+            },
+            "EGTT-RETAIL": {
+              "odds": 1.92,
+              "probability": 0.46913943130477664,
+              "changePermit": "FEED"
+            }
+          },
+          "providerData": {},
+          "id": 1537939099123748864,
+          "correlationId": "sr:market:73718116:7:2?score\u003d0:2"
+        },
+        {
+          "outcomeId": 100003,
+          "active": true,
+          "odds": 3.95,
+          "probability": 0.22133873334584683,
+          "businessUnitFeedConfigs": {
+            "EGTT": {
+              "odds": 3.86,
+              "probability": 0.22133873334584683,
+              "changePermit": "FEED"
+            },
+            "BHBG": {
+              "odds": 3.9,
+              "probability": 0.22133873334584683,
+              "changePermit": "FEED"
+            },
+            "DEMOIT": {
+              "odds": 3.86,
+              "probability": 0.22133873334584683,
+              "changePermit": "FEED"
+            },
+            "DEMOHR": {
+              "odds": 3.86,
+              "probability": 0.22133873334584683,
+              "changePermit": "FEED"
+            },
+            "EGTT-RETAIL": {
+              "odds": 3.86,
+              "probability": 0.22133873334584683,
+              "changePermit": "FEED"
+            }
+          },
+          "providerData": {},
+          "id": 1537939099123748865,
+          "correlationId": "sr:market:73718116:7:3?score\u003d0:2"
+        }
+      ],
+      "marketTemplate": {
+        "marketTemplateOutcomes": [
+          {
+            "id": 100001,
+            "correlationId": "sr:market-template-outcome:1"
+          },
+          {
+            "id": 100002,
+            "correlationId": "sr:market-template-outcome:2"
+          },
+          {
+            "id": 100003,
+            "correlationId": "sr:market-template-outcome:3"
+          }
+        ],
+        "groups": [
+          "all",
+          "score",
+          "regular_play"
+        ],
+        "businessUnitFeedConfigs": {},
+        "id": 100007,
+        "correlationId": "sr:market-template:7"
+      },
+      "isMarketCustomBetCombinable": false,
+      "relatedMarketIdsByType": {},
+      "properties": {},
+      "relatedMarketsByType": {},
+      "providerData": {},
+      "id": 2,
+      "correlationId": "sr:market:73718116:7?score\u003d0:2"
+    },
+    {
+      "specifiers": [
+        {
+          "name": "goalnr",
+          "value": "3"
+        }
+      ],
+      "marketStatus": "Active",
+      "businessUnit": "Default",
+      "isFavourite": true,
+      "marketOutcomes": [
+        {
+          "outcomeId": 100006,
+          "active": false,
+          "odds": 2.55,
+          "probability": 0.35463978788917955,
+          "businessUnitFeedConfigs": {
+            "EGTT": {
+              "odds": 2.51,
+              "probability": 0.35463978788917955,
+              "changePermit": "FEED"
+            },
+            "BHBG": {
+              "odds": 2.53,
+              "probability": 0.35463978788917955,
+              "changePermit": "FEED"
+            },
+            "DEMOIT": {
+              "odds": 2.51,
+              "probability": 0.35463978788917955,
+              "changePermit": "FEED"
+            },
+            "DEMOHR": {
+              "odds": 2.51,
+              "probability": 0.35463978788917955,
+              "changePermit": "FEED"
+            },
+            "EGTT-RETAIL": {
+              "odds": 2.51,
+              "probability": 0.35463978788917955,
+              "changePermit": "FEED"
+            }
+          },
+          "providerData": {},
+          "id": 1537939099224412160,
+          "correlationId": "sr:market:73718116:8:6?goalnr\u003d3"
+        },
+        {
+          "outcomeId": 100007,
+          "active": false,
+          "odds": 2.4,
+          "probability": 0.37406726115114713,
+          "businessUnitFeedConfigs": {
+            "EGTT": {
+              "odds": 2.36,
+              "probability": 0.37406726115114713,
+              "changePermit": "FEED"
+            },
+            "BHBG": {
+              "odds": 2.38,
+              "probability": 0.37406726115114713,
+              "changePermit": "FEED"
+            },
+            "DEMOIT": {
+              "odds": 2.36,
+              "probability": 0.37406726115114713,
+              "changePermit": "FEED"
+            },
+            "DEMOHR": {
+              "odds": 2.36,
+              "probability": 0.37406726115114713,
+              "changePermit": "FEED"
+            },
+            "EGTT-RETAIL": {
+              "odds": 2.36,
+              "probability": 0.37406726115114713,
+              "changePermit": "FEED"
+            }
+          },
+          "providerData": {},
+          "id": 1537939099224412161,
+          "correlationId": "sr:market:73718116:8:7?goalnr\u003d3"
+        },
+        {
+          "outcomeId": 100008,
+          "active": false,
+          "odds": 3.3,
+          "probability": 0.2712929509596733,
+          "businessUnitFeedConfigs": {
+            "EGTT": {
+              "odds": 3.24,
+              "probability": 0.2712929509596733,
+              "changePermit": "FEED"
+            },
+            "BHBG": {
+              "odds": 3.27,
+              "probability": 0.2712929509596733,
+              "changePermit": "FEED"
+            },
+            "DEMOIT": {
+              "odds": 3.24,
+              "probability": 0.2712929509596733,
+              "changePermit": "FEED"
+            },
+            "DEMOHR": {
+              "odds": 3.24,
+              "probability": 0.2712929509596733,
+              "changePermit": "FEED"
+            },
+            "EGTT-RETAIL": {
+              "odds": 3.24,
+              "probability": 0.2712929509596733,
+              "changePermit": "FEED"
+            }
+          },
+          "providerData": {},
+          "id": 1537939099224412162,
+          "correlationId": "sr:market:73718116:8:8?goalnr\u003d3"
+        }
+      ],
+      "marketTemplate": {
+        "marketTemplateOutcomes": [
+          {
+            "id": 100006,
+            "correlationId": "sr:market-template-outcome:6"
+          },
+          {
+            "id": 100007,
+            "correlationId": "sr:market-template-outcome:7"
+          },
+          {
+            "id": 100008,
+            "correlationId": "sr:market-template-outcome:8"
+          }
+        ],
+        "groups": [
+          "all",
+          "score",
+          "regular_play"
+        ],
+        "businessUnitFeedConfigs": {},
+        "id": 100008,
+        "correlationId": "sr:market-template:8"
+      },
+      "isMarketCustomBetCombinable": false,
+      "relatedMarketIdsByType": {},
+      "properties": {},
+      "relatedMarketsByType": {},
+      "providerData": {},
+      "id": 3,
+      "correlationId": "sr:market:73718116:8?goalnr\u003d3"
+    }
+  ],
+  "type": "odds-change",
+  "producerId": 1,
+  "scope": "Live",
+  "activeProducts": [
+    "1"
+  ],
+  "providerTimestamp": 1786743684302,
+  "createdTimestamp": 1786743684320,
+  "scheduledTime": 1786743060000,
+  "sportEventId": 10073718116,
+  "context": {
+    "channel": "FEED",
+    "reason": "INFO",
+    "description": "BetRadar"
+  },
+  "sport": {
+    "id": 1137
+  },
+  "category": {
+    "id": 12265
+  },
+  "tournament": {
+    "id": 19000033496,
+    "sportEventBusinessUnitFeedConfigs": {}
+  },
+  "match": {
+    "coverage": "Unknown",
+    "homeCompetitor": {
+      "id": 11109381,
+      "correlationId": "sr:competitor:1109381"
+    },
+    "awayCompetitor": {
+      "id": 11347796,
+      "correlationId": "sr:competitor:1347796"
+    },
+    "draft": false,
+    "matchStatus": "2nd half",
+    "sportEventBusinessUnitFeedConfigs": {},
+    "providerData": {},
+    "id": 10073718116
+  },
+  "manual": false,
+  "receivedInTradingTimestamp": 1786743684319,
+  "timeMetricsDto": {
+    "receivedInEgt": 1786743684319,
+    "receivedInFeedHub": 0,
+    "receivedInFeedAggregator": 0,
+    "receivedInUnifiedFeedTopic": 0,
+    "receivedInTradingFA": 0
+  }
+}

@@ -22,5 +22,9 @@
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
-
+	
+  <ItemGroup>
+  	<None Update="FilterEvaluatorTestSamples\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+	
 </Project>

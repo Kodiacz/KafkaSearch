@@ -2,7 +2,7 @@
 
 public enum CompareOp
 {
-    Eq, NotEq,
+    Equal, NotEqual,
     GreaterThan, GreaterThanOrEqual, LessThan, LessThanOrEqual,
     Contains, StartsWith, EndsWith,
     Exists

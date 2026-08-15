@@ -21,17 +21,24 @@ public class FilterEvaluator : IFilterEvaluator
     {
         value = scope;
 
+        var inspectValue = value.ToString();
+
         if (string.IsNullOrEmpty(path))
             return true;
 
         foreach (var segment in path.Split('.'))
         {
-            if (value.ValueKind != JsonValueKind.Object ||
-                !value.TryGetProperty(segment, out value))
+            var isDifferentThenObject = value.ValueKind != JsonValueKind.Object;
+            var isNotParsed = !value.TryGetProperty(segment, out var property);
+            var resultInspection = property.ToString();
+
+            if (isDifferentThenObject || isNotParsed)
             {
                 value = default;
                 return false;
             }
+
+            //value = property;
         }
 
         return true;
@@ -39,9 +46,9 @@ public class FilterEvaluator : IFilterEvaluator
 
     private static bool Matches(JsonElement actual, CompareOp op, JsonElement expected) => op switch
     {
-        CompareOp.Exists => true,        // TryResolve already succeeded
-        CompareOp.Eq => AreEqual(actual, expected),
-        CompareOp.NotEq => !AreEqual(actual, expected),
+        CompareOp.Exists => true,
+        CompareOp.Equal => AreEqual(actual, expected),
+        CompareOp.NotEqual => !AreEqual(actual, expected),
         CompareOp.Contains => AsString(actual)?.Contains(AsString(expected) ?? "", StringComparison.OrdinalIgnoreCase) == true,
         CompareOp.StartsWith => AsString(actual)?.StartsWith(AsString(expected) ?? "", StringComparison.OrdinalIgnoreCase) == true,
         CompareOp.EndsWith => AsString(actual)?.EndsWith(AsString(expected) ?? "", StringComparison.OrdinalIgnoreCase) == true,
