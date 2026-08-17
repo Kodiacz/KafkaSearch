@@ -5,16 +5,16 @@ using KafkaSearch.Core.Services.Interfaces;
 
 public class TopicService : ITopicService
 {
-    private IKafkaConnectionService _kafkaConnectionService;
+    private IClusterClientProvider _kafkaConnectionService;
 
-    public TopicService(IKafkaConnectionService kafkaConnectionService)
+    public TopicService(IClusterClientProvider kafkaConnectionService)
     {
         _kafkaConnectionService = kafkaConnectionService;
     }
 
     public OperationResult<string[]> GetTopicsNames(string clusterProfileName)
     {
-        var clientMetadataResult = _kafkaConnectionService.GetAdminClientMetadata(clusterProfileName);
+        var clientMetadataResult = _kafkaConnectionService.MetadataFor(clusterProfileName);
 
         if (clientMetadataResult.IsFailure)
             return OperationResult.Fail(clientMetadataResult.Failure);
