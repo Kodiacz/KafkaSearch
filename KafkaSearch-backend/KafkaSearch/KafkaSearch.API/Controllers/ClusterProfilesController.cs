@@ -11,14 +11,14 @@ namespace KafkaSearch.API.Controllers;
 public class ClusterProfilesController : ControllerBase
 {
     private readonly IClusterProfileService _clusterProfileService;
-    private readonly IKafkaConnectionService _kafkaConnectionService;
+    private readonly IClusterClientProvider _clusterClientProvider;
 
     public ClusterProfilesController(
         IClusterProfileService clusterProfileService, 
-        IKafkaConnectionService kafkaConnectionService)
+        IClusterClientProvider clusterClientProvider)
     {
         _clusterProfileService = clusterProfileService;
-        _kafkaConnectionService = kafkaConnectionService;
+        _clusterClientProvider = clusterClientProvider;
     }
 
     [HttpGet]
@@ -40,7 +40,6 @@ public class ClusterProfilesController : ControllerBase
                 .Update(existingClusterName, updateClusterProfileRequest.ToClusterProfile(existingClusterName))
                 .ToActionResult(this);
     
-
     [HttpDelete("{clusterName}")]
     public IActionResult Delete([FromRoute] string clusterName)
         => _clusterProfileService.Delete(clusterName).ToActionResult(this);
@@ -48,6 +47,6 @@ public class ClusterProfilesController : ControllerBase
 
     [HttpPost("{clusterName}/test-connection")]
     public IActionResult TestConnection([FromRoute] string clusterName)
-        => _kafkaConnectionService.TestConnection(clusterName).ToActionResult(this);
-    
+        => _clusterClientProvider.MetadataFor(clusterName).ToActionResult(this);
+
 }
