@@ -38,7 +38,7 @@ public class FilterEvaluator : IFilterEvaluator
                 return false;
             }
 
-            //value = property;
+            value = property;
         }
 
         return true;
