@@ -15,7 +15,6 @@ public class KafkaConnectionService : IKafkaConnectionService, IDisposable
     private TimeSpan _metadataTimeout = TimeSpan.FromSeconds(5);
 
     public KafkaConnectionService(
-        IClusterProfileService clusterProfileService,
         IKafkaClientFactory kafkaClientFactory)
     {
         _kafkaClientFactory = kafkaClientFactory;
@@ -56,24 +55,6 @@ public class KafkaConnectionService : IKafkaConnectionService, IDisposable
     {
         foreach (var client in _adminClientCache.Values)
             client.Dispose();
-    }
-
-    public OperationResult<Metadata> GetAdminClientMetadata(string clusterName)
-    {
-        if (!_adminClientCache.TryGetValue(clusterName, out var client))
-            return OperationResult.Fail<Metadata>(
-                Failure.Operation($"Admin client for cluster '{clusterName}' does not exist.", 404));
-
-        return OperationResult.Try(() => client.GetMetadata(_metadataTimeout));
-    }
-
-    public OperationResult<bool> TestConnection(string clusterName)
-    {
-        if (!_adminClientCache.TryGetValue(clusterName, out var client))
-            return OperationResult.Fail<bool>(
-                Failure.Operation($"Admin client for cluster '{clusterName}' does not exist.", 404));
-
-        return Verify(client);
     }
 
     private OperationResult Verify(IAdminClient client)
