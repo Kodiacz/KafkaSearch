@@ -1,17 +1,20 @@
 using KafkaSearch.API;
 using KafkaSearch.API.BacgroundServices;
-using KafkaSearch.API.Infrastructure;
-using KafkaSearch.Core.Abstractions;
 using KafkaSearch.Core.Options;
-using KafkaSearch.Core.Services;
-using KafkaSearch.Core.Services.Interfaces;
 using Scalar.AspNetCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services
+	.AddControllers()
+	.AddJsonOptions(options => 
+	{
+		options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+	});
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddHostedService<AppStartupService>();
