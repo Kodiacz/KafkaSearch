@@ -8,17 +8,17 @@ public class KafkaClientFactory : IKafkaClientFactory
 {
     public IAdminClient Create(ClusterProfile profile)
         => new AdminClientBuilder(new AdminClientConfig
-        {
-            BootstrapServers = profile.BootstrapServers
-        }).Build();
+            {
+                BootstrapServers = profile.BootstrapServers
+            }).Build();
 
     public IConsumer<byte[], byte[]> CreateConsumer(ClusterProfile profile, string groupId)
         => new ConsumerBuilder<byte[], byte[]>(new ConsumerConfig
-        {
-            BootstrapServers = profile.BootstrapServers,
-            GroupId = groupId,
-            EnableAutoCommit = false,
-            AutoOffsetReset = AutoOffsetReset.Earliest,
-            EnablePartitionEof = true
-        }).Build();
+            {
+                BootstrapServers = profile.BootstrapServers,
+                GroupId = groupId,
+                EnableAutoCommit = false,
+                AutoOffsetReset = AutoOffsetReset.Earliest,
+                EnablePartitionEof = true
+            }).Build();
 }
