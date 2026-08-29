@@ -6,6 +6,7 @@ using KafkaSearch.Core.Filtering;
 using KafkaSearch.Core.Models;
 using KafkaSearch.Core.Services.Interfaces;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
@@ -38,6 +39,9 @@ public class MessageScanService : IMessageScanService
         string topic,
         FilterNode filter,
         int maxMessagesPerPartition = 50_000,
+        int? inputPartition = null,
+        Offset? offset = null,
+        DateTime? fromTimestamp = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var profileResult = _clusterProfileService.GetByName(clusterProfileName);
@@ -56,20 +60,48 @@ public class MessageScanService : IMessageScanService
             profileResult.Value!,
             groupId: $"kafkasearch-scan-{Guid.NewGuid()}");
 
-        var assignments = topicMetadata.Partitions
-            .Select(p => new TopicPartitionOffset(topic, p.PartitionId, Offset.Beginning))
-            .ToList();
+        List<TopicPartitionOffset> assignments;
+
+        var relevantPartitions = inputPartition.HasValue
+            ? topicMetadata.Partitions.Where(p => p.PartitionId == inputPartition)
+            : topicMetadata.Partitions;
+
+        if (fromTimestamp.HasValue)
+        {
+            var timestampToSearch = relevantPartitions
+                .Select(p => new TopicPartitionTimestamp(
+                    topic,
+                    p.PartitionId,
+                    new Timestamp(fromTimestamp.Value.ToUniversalTime())));
+
+            assignments = consumer.OffsetsForTimes(timestampToSearch, TimeSpan.FromSeconds(10));
+        }
+        else
+        {
+            var effectiveOffset = offset ?? Offset.Beginning;
+
+            assignments = relevantPartitions
+                .Select(p => new TopicPartitionOffset(topic, p.PartitionId, effectiveOffset))
+                .ToList();
+        }
 
         consumer.Assign(assignments);
 
         var pendingPartitions = assignments.Select(a => a.Partition.Value).ToHashSet();
         var readCounts = assignments.ToDictionary(a => a.Partition.Value, a => 0);
 
+        var totalSw = Stopwatch.StartNew();
+        long consumeRawTicks = 0;
+        long evalRawTicks = 0;
+        int messagesRead = 0;
+
         try
         {
             while (pendingPartitions.Count > 0)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+
+                var beforeConsumer = Stopwatch.GetTimestamp();
 
                 var result = consumer.Consume(_pollTimeout);
 
@@ -83,13 +115,23 @@ public class MessageScanService : IMessageScanService
                 }
 
                 var partition = result.Partition.Value;
-                
+
                 readCounts[partition]++;
+
+                var beforeEvaluate = Stopwatch.GetTimestamp();
 
                 var message = TryEvaluate(result, topic, filter);
 
+                evalRawTicks += Stopwatch.GetTimestamp() - beforeEvaluate;
+
                 if (message is not null)
+                {
                     yield return message;
+                }
+                else
+                {
+                    _logger.LogError($"No match for message: partition {partition} readCounts: {readCounts[partition]}");
+                }
 
                 if (readCounts[partition] >= maxMessagesPerPartition)
                 {
@@ -101,6 +143,15 @@ public class MessageScanService : IMessageScanService
         finally
         {
             consumer.Close();
+
+            var consumeMs = consumeRawTicks * 1000.0 / Stopwatch.Frequency;
+            var evalMs = evalRawTicks * 1000.0 / Stopwatch.Frequency;
+
+            _logger.LogInformation(
+                "Scan stats: {Messages} messages, {TotalMs:F0}ms total, {ConsumeMs:F0}ms waiting on Kafka ({ConsumePct:F0}%), {EvalMs:F0}ms parsing+filtering ({EvalPct:F0}%)",
+                messagesRead, totalSw.Elapsed.TotalMilliseconds,
+                consumeMs, 100.0 * consumeMs / totalSw.Elapsed.TotalMilliseconds,
+                evalMs, 100.0 * evalMs / totalSw.Elapsed.TotalMilliseconds);
         }
     }
 
