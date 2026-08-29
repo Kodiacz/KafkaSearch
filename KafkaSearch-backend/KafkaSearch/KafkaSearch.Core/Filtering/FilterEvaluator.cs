@@ -2,6 +2,7 @@
 
 using KafkaSearch.Core.Abstractions;
 using KafkaSearch.Core.Enums;
+using System.Diagnostics;
 using System.Text.Json;
 
 public class FilterEvaluator : IFilterEvaluator
@@ -62,7 +63,7 @@ public class FilterEvaluator : IFilterEvaluator
     private static bool AreEqual(JsonElement actual, JsonElement expected)
     {
         if (actual.ValueKind == JsonValueKind.Number && expected.ValueKind == JsonValueKind.Number)
-            return actual.GetDouble().Equals(expected.GetDouble());
+            return actual.GetDecimal().Equals(expected.GetDecimal());
 
         if (actual.ValueKind is JsonValueKind.True or JsonValueKind.False &&
             expected.ValueKind is JsonValueKind.True or JsonValueKind.False)
