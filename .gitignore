@@ -4,8 +4,9 @@
 ## Get latest from `dotnet new gitignore`
 
 # data
-C:\Users\simeon.yordanov\Personal\KafkaSearch\KafkaSearch-backend\KafkaSearch\KafkaSearch.API\data
-C:\Users\simeon.yordanov\Personal\KafkaSearch\notes
+# data
+/KafkaSearch-backend/KafkaSearch/KafkaSearch.API/data/
+/notes/
 
 
 # dotenv files
