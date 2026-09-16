@@ -1,5 +1,6 @@
 import TextField from "@mui/material/TextField";
-import styles from "../css/SelectField.module.css";
+import { useStyles } from "../css/NumberField.styles.ts";
+
 
 interface NumberFieldProps {
   label: string;
@@ -9,9 +10,13 @@ interface NumberFieldProps {
   max?: number;
 }
 
-const NumberField = ({ label, value, onChange, min, max }: NumberFieldProps) => (
-  <TextField
-    className={styles.maxResultField}
+const NumberField = ({ label, value, onChange, min, max }: NumberFieldProps) => {
+
+  const classes = useStyles();
+  
+  return (
+    <TextField
+    className={classes.selectFieldBox}
     type="number"
     label={label}
     value={value}
@@ -19,5 +24,6 @@ const NumberField = ({ label, value, onChange, min, max }: NumberFieldProps) => 
     slotProps={{ htmlInput: { min, max } }}
   />
 );
+}
 
 export default NumberField;

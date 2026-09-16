@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import { searchMessages } from "../api/kafkaClient";
 import type { KafkaMessage } from "../types/kafka";
 import MessageSearchPanel from "../components/MessageSearchPanel";
-import styles from "../components/css/MessageSearchPanel.module.css";
+import styles from "./css/Messages.module.css";
 
 export default function Messages() {
   const [topic, setTopic] = useState("");
@@ -26,7 +26,7 @@ export default function Messages() {
   }
 
   return (
-    <Box className={styles.panel}>
+    <Box className={styles.messageBox}>
         <MessageSearchPanel/>
     </Box>
   );

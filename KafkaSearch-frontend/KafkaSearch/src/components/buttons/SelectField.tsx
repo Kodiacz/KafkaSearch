@@ -4,7 +4,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
-import styles from "../css/SelectField.module.css";
+import { useStyles } from "../css/SelectField.styles.ts";
 
 type SelectFieldProps = {
   labelName: string;
@@ -14,13 +14,15 @@ type SelectFieldProps = {
 export default function SelectField({ labelName, items }: SelectFieldProps) {
   const [selectedItem, setSelectedItem] = React.useState(items[0]);
 
+  const classes = useStyles({ labelLength: labelName.length });
+  
   const handleChange = (event: SelectChangeEvent) => {
     setSelectedItem(event.target.value as string);
   };
 
   return (
-    <Box className={styles.selectFieldBox}>
-      <FormControl fullWidth>
+    <Box className={classes.formControl} >
+      <FormControl>
         <InputLabel>{labelName}</InputLabel>
         <Select
           value={selectedItem}

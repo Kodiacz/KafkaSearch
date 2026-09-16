@@ -1,9 +1,8 @@
-.message-box {
+.messageBox {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
   width: 100%;
-  justify-self: center;
-  align-self: center;
+  height: 100%;
 }
