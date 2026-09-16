@@ -1,13 +1,15 @@
 import "./App.css";
-import MessageSearchPanel from "./components/MessageSearchPanel";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import CssBaseline from "@mui/material/CssBaseline";
 import Messages from "./pages/Messages";
-import Box from "@mui/material/Box";
 
 function App() {
   return (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <MessageSearchPanel />
-    </Box>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <CssBaseline />
+        <Messages />
+    </LocalizationProvider>
   );
 }
 

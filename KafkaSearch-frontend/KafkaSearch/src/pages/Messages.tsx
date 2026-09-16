@@ -1,7 +1,10 @@
 // src/pages/Messages.tsx
 import { useState } from "react";
+import Box from "@mui/material/Box";
 import { searchMessages } from "../api/kafkaClient";
 import type { KafkaMessage } from "../types/kafka";
+import MessageSearchPanel from "../components/MessageSearchPanel";
+import styles from "../components/css/MessageSearchPanel.module.css";
 
 export default function Messages() {
   const [topic, setTopic] = useState("");
@@ -23,15 +26,8 @@ export default function Messages() {
   }
 
   return (
-    <div>
-      <input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="Topic name" />
-      <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter" />
-      <button onClick={handleSearch} disabled={loading || !topic}>
-        {loading ? "Searching..." : "Search"}
-      </button>
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {results && <pre>{JSON.stringify(results, null, 2)}</pre>}
-    </div>
+    <Box className={styles.panel}>
+        <MessageSearchPanel/>
+    </Box>
   );
 }
