@@ -105,6 +105,8 @@ public class MessageScanService : IMessageScanService
 
                 var result = consumer.Consume(_pollTimeout);
 
+                consumeRawTicks += Stopwatch.GetTimestamp() - beforeConsumer;
+
                 if (result is null)
                     continue;
 
@@ -117,6 +119,7 @@ public class MessageScanService : IMessageScanService
                 var partition = result.Partition.Value;
 
                 readCounts[partition]++;
+                messagesRead++;
 
                 var beforeEvaluate = Stopwatch.GetTimestamp();
 
@@ -128,10 +131,10 @@ public class MessageScanService : IMessageScanService
                 {
                     yield return message;
                 }
-                else
-                {
-                    _logger.LogError($"No match for message: partition {partition} readCounts: {readCounts[partition]}");
-                }
+                //else
+                //{
+                //    _logger.LogError($"No match for message: partition {partition} readCounts: {readCounts[partition]}");
+                //}
 
                 if (readCounts[partition] >= maxMessagesPerPartition)
                 {

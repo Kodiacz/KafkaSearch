@@ -62,6 +62,8 @@ public class FilterEvaluator : IFilterEvaluator
 
     private static bool AreEqual(JsonElement actual, JsonElement expected)
     {
+        //if (actual.GetRawText() == "121666103819871514") Debugger.Break();
+        
         if (actual.ValueKind == JsonValueKind.Number && expected.ValueKind == JsonValueKind.Number)
             return actual.GetDecimal().Equals(expected.GetDecimal());
 

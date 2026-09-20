@@ -2,6 +2,7 @@
 
 using KafkaSearch.API.Infrastructure;
 using KafkaSearch.Core.Abstractions;
+using KafkaSearch.Core.ConsumerPooling;
 using KafkaSearch.Core.Factories;
 using KafkaSearch.Core.Filtering;
 using KafkaSearch.Core.Services;
@@ -19,6 +20,7 @@ public static class DependencyInjection
         services.AddSingleton<IClusterClientProvider, ClusterClientProvider>();
         services.AddSingleton<IFilterEvaluator, FilterEvaluator>();
         services.AddSingleton<IFileSystem, FileSystem>();
+        services.AddSingleton<IKafkaConsumerPoolManager, KafkaConsumerPoolManager>();
         return services;
     }
 }
