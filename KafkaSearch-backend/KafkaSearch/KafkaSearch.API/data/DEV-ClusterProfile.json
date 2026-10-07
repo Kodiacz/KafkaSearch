@@ -1,6 +1,6 @@
 {
   "ClusterName": "dev",
-  "BootstrapServers": "172.17.52.202",
+  "BootstrapServers": "172.17.52.235",
   "KafkaClusterVersion": null,
   "ZookeeperSettings": null
 }

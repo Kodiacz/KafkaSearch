@@ -29,14 +29,17 @@ public class SearchController : ControllerBase
 
         return TypedResults.ServerSentEvents(
             _messageScanService.Scan(
-                request.ClusterProfileName,
-                request.Topic,
-                filter,
-                request.MaxMessagesPerPartition,
-                request.partition,
-                request.offset,
-                request.fromTimestamp,
-                cancellationToken),
+                clusterProfileName: request.ClusterProfileName,
+                topic: request.Topic,
+                filter: filter,
+                key: request.key,
+                keyFormat: request.KeyFormat,
+                maxMessagesPerPartition: request.MaxMessagesPerPartition,
+                partition: request.partition,
+                seekMode: request.seekMode,
+                offsetValue: request.offsetValue,
+                fromTimestamp: request.fromTimestamp,
+                cancellationToken: cancellationToken),
             eventType: "message");
     }
 }

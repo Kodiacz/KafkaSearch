@@ -1,13 +1,16 @@
 ﻿namespace KafkaSearch.API.Contracts.Requests;
 
-using Confluent.Kafka;
 using KafkaSearch.Core.Filtering;
+using KafkaSearch.Core.Models;
 
 public sealed record ScanRequest(
     string ClusterProfileName,
     string Topic,
     FilterNode? Filter,
     int? partition,
-    Offset? offset = null,
+    string key,
+    KeyFormat KeyFormat = KeyFormat.Auto,
+    SeekMode seekMode = SeekMode.Newest,
+    long? offsetValue = null,
     DateTime? fromTimestamp = null,
     int MaxMessagesPerPartition = 50_000);

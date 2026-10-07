@@ -21,6 +21,7 @@ public static class DependencyInjection
         services.AddSingleton<IFilterEvaluator, FilterEvaluator>();
         services.AddSingleton<IFileSystem, FileSystem>();
         services.AddSingleton<IKafkaConsumerPoolManager, KafkaConsumerPoolManager>();
+        services.AddSingleton<IConsumerGroupService, ConsumerGroupService>();
         return services;
     }
 }

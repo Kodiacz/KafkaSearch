@@ -20,29 +20,31 @@ public class KafkaConnectionService : IKafkaConnectionService, IDisposable
         _kafkaClientFactory = kafkaClientFactory;
     }
 
-    public OperationResult<IAdminClient> GetOrCreateAdminClient(ClusterProfile clusterProfile)
+    public OperationResult<AdminClientWithMetadata> GetOrCreateAdminClient(ClusterProfile clusterProfile)
     {
         if (clusterProfile is null)
-            return OperationResult.Fail<IAdminClient>(Failure.Validation("Cluster profile cannot be null."));
+            return OperationResult.Fail<AdminClientWithMetadata>(Failure.Validation("Cluster profile cannot be null."));
 
         if (_adminClientCache.TryGetValue(clusterProfile.ClusterName, out var existingClient))
-            return OperationResult.Ok(existingClient);
+            return OperationResult.Ok(new AdminClientWithMetadata(existingClient, FreshMetadata: null));
 
         var buildResult = OperationResult.Try(() => _kafkaClientFactory.Create(clusterProfile));
 
         if (buildResult.IsFailure)
-            return OperationResult.Fail<IAdminClient>(buildResult.Failure);
+            return OperationResult.Fail<AdminClientWithMetadata>(buildResult.Failure);
 
         var client = buildResult.Value!;
-        var verified = Verify(client);
+        var verified = GetVerifiedMetadata(client);
 
         if (verified.IsFailure)
         {
             client.Dispose();
-            return OperationResult.Fail<IAdminClient>(verified.Failure);
+            return OperationResult.Fail<AdminClientWithMetadata>(verified.Failure);
         }
 
-        return OperationResult.Ok(_adminClientCache.GetOrAdd(clusterProfile.ClusterName, client));
+        var cachedClient = _adminClientCache.GetOrAdd(clusterProfile.ClusterName, client);
+
+        return OperationResult.Ok(new AdminClientWithMetadata(cachedClient, verified.Value));
     }
 
     public void InvalidateConnection(string clusterName)
@@ -57,6 +59,6 @@ public class KafkaConnectionService : IKafkaConnectionService, IDisposable
             client.Dispose();
     }
 
-    private OperationResult Verify(IAdminClient client)
+    private OperationResult<Metadata> GetVerifiedMetadata(IAdminClient client)
         => OperationResult.Try(() => client.GetMetadata(_metadataTimeout));
 }

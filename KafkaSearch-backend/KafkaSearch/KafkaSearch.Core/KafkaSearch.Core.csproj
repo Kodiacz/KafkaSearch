@@ -13,7 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\NewFolder\" />
     <Folder Include="Utils\" />
     <Folder Include="Validations\" />
   </ItemGroup>

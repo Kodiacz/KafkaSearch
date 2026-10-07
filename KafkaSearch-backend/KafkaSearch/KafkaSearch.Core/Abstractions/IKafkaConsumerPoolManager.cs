@@ -1,8 +1,9 @@
 ﻿namespace KafkaSearch.Core.Abstractions;
 
+using KafkaSearch.Core.Common;
 using KafkaSearch.Core.ConsumerPooling;
 
 public interface IKafkaConsumerPoolManager
 {
-    Task<RentedConsumer> RentAsync(string clusterProfileName, CancellationToken ct = default);
+    Task<OperationResult<RentedConsumer>> RentAsync(string clusterProfileName, CancellationToken ct = default);
 }

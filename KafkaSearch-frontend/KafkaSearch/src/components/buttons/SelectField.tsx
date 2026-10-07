@@ -9,28 +9,36 @@ import { useStyles } from "../css/SelectField.styles.ts";
 type SelectFieldProps = {
   labelName: string;
   items: string[];
+  value?: string;
+  onChange?: (value: string) => void;
 };
 
-export default function SelectField({ labelName, items }: SelectFieldProps) {
-  const [selectedItem, setSelectedItem] = React.useState(items[0]);
+export default function SelectField({ labelName, items, value, onChange }: SelectFieldProps) {
+  const [internalValue, setInternalValue] = React.useState(items[0]);
 
-  const classes = useStyles({ labelLength: labelName.length });
-  
+  const isControlled = value !== undefined;
+  const selectedItem = isControlled ? value : internalValue;
+
+  const classes = useStyles();
+
   const handleChange = (event: SelectChangeEvent) => {
-    setSelectedItem(event.target.value as string);
+    const next = event.target.value;
+    if (!isControlled) setInternalValue(next);
+    onChange?.(next);
   };
 
   return (
-    <Box className={classes.formControl} >
+    <Box className={classes.formControl}>
       <FormControl>
         <InputLabel>{labelName}</InputLabel>
         <Select
           value={selectedItem}
           label={labelName}
           onChange={handleChange}
+          sx={{ minWidth: 120 }}
         >
-          {items.map((item, index) => (
-            <MenuItem key={index} value={item}>
+          {items.map((item) => (
+            <MenuItem key={item} value={item}>
               {item}
             </MenuItem>
           ))}

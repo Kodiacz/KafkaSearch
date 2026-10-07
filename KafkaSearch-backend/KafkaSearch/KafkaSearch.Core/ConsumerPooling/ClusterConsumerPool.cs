@@ -2,6 +2,7 @@
 
 using KafkaSearch.Core.Abstractions;
 using KafkaSearch.Core.Models;
+using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 
 public sealed class ClusterConsumerPool : IDisposable
@@ -13,10 +14,12 @@ public sealed class ClusterConsumerPool : IDisposable
     private readonly ConcurrentStack<PooledConsumerEntry> _idle = new();
     private readonly Timer _sweepTimer;
     private readonly TimeSpan? _idleTimeout;
+    private ILogger<ClusterConsumerPool> _logger;
 
     public ClusterConsumerPool(
         IKafkaClientFactory kafkaClientFactory,
         ClusterProfile clusterProfile,
+        ILogger<ClusterConsumerPool> logger,
         int minSize = 1,
         int maxSize = 4,
         TimeSpan? sweepInterval = null,
@@ -24,6 +27,7 @@ public sealed class ClusterConsumerPool : IDisposable
     {
         _kafkaClientFactory = kafkaClientFactory;
         _clusterProfile = clusterProfile;
+        _logger = logger;
         _minSize = minSize;
         _creationGate = new SemaphoreSlim(maxSize, maxSize);
         _idleTimeout = idleTimeout ?? TimeSpan.FromMinutes(5);
@@ -34,12 +38,9 @@ public sealed class ClusterConsumerPool : IDisposable
 
     public async Task<RentedConsumer> RentAsync(CancellationToken ct = default)
     {
-        // Reusing an idle one costs nothing and never waits — total-alive
-        // count is unchanged, so the creation gate has nothing to say about it.
         if (_idle.TryPop(out var entry))
             return new RentedConsumer(this, entry);
 
-        // Nothing idle. Only NOW do we ask "is there room for one more to exist?"
         await _creationGate.WaitAsync(ct);
         var consumer = _kafkaClientFactory.CreateConsumer(
             _clusterProfile, groupId: $"kafkasearch-pool-{Guid.NewGuid()}");
@@ -56,12 +57,12 @@ public sealed class ClusterConsumerPool : IDisposable
         if (!healthy)
         {
             entry.Consumer.Dispose();
-            _creationGate.Release(); // this slot is free for a future new instance
+            _creationGate.Release();
             return;
         }
 
         entry.LastReturnedUtc = DateTime.UtcNow;
-        _idle.Push(entry); // back on the shelf — no permit involved either way
+        _idle.Push(entry);
     }
 
     public void Dispose()
@@ -75,7 +76,7 @@ public sealed class ClusterConsumerPool : IDisposable
     {
         var cutoff = DateTime.UtcNow - _idleTimeout;
         var toKeep = new List<PooledConsumerEntry>();
-        var aliveCount = _minSize; // placeholder floor check below
+        var aliveCount = _minSize;
 
         while (_idle.TryPop(out var entry))
         {
@@ -86,6 +87,7 @@ public sealed class ClusterConsumerPool : IDisposable
             {
                 entry.Consumer.Dispose();
                 _creationGate.Release();
+                _logger.LogInformation("Released idle consumer from pool for cluster {Cluster}", _clusterProfile.ClusterName);
             }
             else toKeep.Add(entry);
         }

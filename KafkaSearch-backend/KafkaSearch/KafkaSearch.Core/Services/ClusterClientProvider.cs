@@ -2,6 +2,7 @@
 
 using Confluent.Kafka;
 using KafkaSearch.Core.Common;
+using KafkaSearch.Core.Models;
 using KafkaSearch.Core.Services.Interfaces;
 
 public class ClusterClientProvider : IClusterClientProvider
@@ -20,21 +21,34 @@ public class ClusterClientProvider : IClusterClientProvider
 
     public OperationResult<IAdminClient> ForCluster(string clusterProfileName)
     {
-        var profile = _clusterProfileService.GetByName(clusterProfileName);
+        var result = ResolveClient(clusterProfileName);
+        if (result.IsFailure)
+            return OperationResult.Fail<IAdminClient>(result.Failure);
 
-        if (profile.IsFailure)
-            return OperationResult.Fail<IAdminClient>(profile.Failure);
-
-        return _kafkaConnectionService.GetOrCreateAdminClient(profile.Value!);
+        return OperationResult.Ok(result.Value!.Client);
     }
 
     public OperationResult<Metadata> MetadataFor(string clusterProfileName)
     {
-        var clientResult = ForCluster(clusterProfileName);
+        var result = ResolveClient(clusterProfileName);
+        if (result.IsFailure)
+            return OperationResult.Fail<Metadata>(result.Failure);
 
-        if (clientResult.IsFailure)
-            return OperationResult.Fail<Metadata>(clientResult.Failure);
+        var resolved = result.Value!;
 
-        return OperationResult.Try(() => clientResult.Value!.GetMetadata(_timeout));
+        if (resolved.FreshMetadata is not null)
+            return OperationResult.Ok(resolved.FreshMetadata);
+
+        return OperationResult.Try(() => resolved.Client.GetMetadata(_timeout));
+    }
+
+    private OperationResult<AdminClientWithMetadata> ResolveClient(string clusterProfileName)
+    {
+        var profile = _clusterProfileService.GetByName(clusterProfileName);
+
+        if (profile.IsFailure)
+            return OperationResult.Fail<AdminClientWithMetadata>(profile.Failure);
+
+        return _kafkaConnectionService.GetOrCreateAdminClient(profile.Value!);
     }
 }

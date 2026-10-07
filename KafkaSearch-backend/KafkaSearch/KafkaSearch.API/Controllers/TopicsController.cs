@@ -16,6 +16,13 @@ public class TopicsController : ControllerBase
     }
 
     [HttpGet("names")]
-    public IActionResult GetTopicsNames(string clusterProfile)
+    public async Task<IActionResult> GetTopicsNames(string clusterProfile)
         => _topicService.GetTopicsNames(clusterProfile).ToActionResult(this);
+
+    [HttpGet("describe/{topic}")]
+    public async Task<IActionResult> GetTopicInformation(string clusterProfile, string topic)
+    {
+        var topicDescription = await _topicService.DescribeTopic(clusterProfile, topic);
+        return topicDescription.ToActionResult(this);
+    }
 }

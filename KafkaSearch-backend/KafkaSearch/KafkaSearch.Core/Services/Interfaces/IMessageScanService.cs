@@ -1,6 +1,5 @@
 ﻿namespace KafkaSearch.Core.Services.Interfaces;
 
-using Confluent.Kafka;
 using KafkaSearch.Core.Filtering;
 using KafkaSearch.Core.Models;
 
@@ -10,9 +9,12 @@ public interface IMessageScanService
         string clusterProfileName,
         string topic,
         FilterNode filter,
+        string key,
+        KeyFormat keyFormat = KeyFormat.Auto,
         int maxMessagesPerPartition = 50_000,
         int? partition = null,
-        Offset? offset = null,
+        SeekMode seekMode = SeekMode.Newest,
+        long? offsetValue = null,
         DateTime? fromTimestamp = null,
         CancellationToken cancellationToken = default);
 }
