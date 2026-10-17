@@ -13,17 +13,20 @@ export interface SearchMessagesParams {
   filter?: string;
 }
 
-export type CompareOp =
-  | "Equal"
-  | "NotEqual"
-  | "GreaterThan"
-  | "GreaterThanOrEqual"
-  | "LessThan"
-  | "LessThanOrEqual"
-  | "Contains"
-  | "StartsWith"
-  | "EndsWith"
-  | "Exists";
+export const COMPARE_OPS = [
+  "Equal",
+  "NotEqual",
+  "GreaterThan",
+  "GreaterThanOrEqual",
+  "LessThan",
+  "LessThanOrEqual",
+  "Contains",
+  "StartsWith",
+  "EndsWith",
+  "Exists",
+] as const;
+
+export type CompareOp = (typeof COMPARE_OPS)[number];
 
 export type FilterNode =
   | { type: "and"; nodes: FilterNode[] }
@@ -31,9 +34,18 @@ export type FilterNode =
   | { type: "any"; path: string; where: FilterNode }
   | { type: "compare"; path: string; op: CompareOp; value: unknown };
 
-export type keyFormat = "Auto" | "String" | "Int32" | "Int64" | "Hex";
+export type KeyFormat = "Auto" | "String" | "Int32" | "Int64" | "Hex";
 
-export type seekMode = "Oldest" | "Newest" | "Offset" | "Timestamp";
+export const SEEK_MODES = ["Oldest", "Newest", "Offset", "Timestamp"] as const;
+
+export const SeekMode = {
+  Newest: "Newest",
+  Oldest: "Oldest",
+  Offset: "Offset",
+  Timestamp: "Timestamp",
+} as const;
+
+export type SeekMode = (typeof SeekMode)[keyof typeof SeekMode];
 
 export type ScanRequest = {
   clusterProfileName: string;
@@ -41,20 +53,20 @@ export type ScanRequest = {
   filter?: FilterNode | null;
   partition?: number | null;
   key?: string | null;
-  keyFormat?: keyFormat | null;
-  seekMode?: seekMode | null;
+  keyFormat?: KeyFormat | null;
+  seekMode?: SeekMode | null;
   offsetValue?: number | null;
   fromTimestamp?: string | null;
   maxMessagesPerPartition?: number;
 };
 
 export interface PartitionInfo {
-  partitionId: number;
-  leader: number;
-  replicas: number[];
-  inSyncReplicas: number[];
-  lowWatermark: number;
   highWatermark: number;
+  inSyncReplicas: number[];
+  leader: number;
+  lowWatermark: number;
+  partitionId: number;
+  replicas: number[];
 }
 
 export interface ConsumerGroupLag {
@@ -101,4 +113,9 @@ export interface TopicMetadata {
   config: TopicConfig;
   partitions: PartitionInfo[];
   consumerGroups: ConsumerGroupLag[];
+}
+
+export type TopicSummary = {
+  name: string;
+  partitionCount: number;
 }

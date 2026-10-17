@@ -12,14 +12,15 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^9.4.0",
+    "@mui/icons-material": "^9.5.0",
     "@mui/material": "^9.4.0",
     "@mui/x-date-pickers": "^9.13.0",
     "dayjs": "^1.11.23",
     "match-sorter": "^8.3.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-jss": "^10.10.0"
+    "react-jss": "^10.10.0",
+    "react-querybuilder": "^8.24.4"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

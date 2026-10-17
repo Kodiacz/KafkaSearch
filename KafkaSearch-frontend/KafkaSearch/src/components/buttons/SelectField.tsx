@@ -6,14 +6,19 @@ import FormControl from "@mui/material/FormControl";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import { useStyles } from "../css/SelectField.styles.ts";
 
-type SelectFieldProps = {
+type SelectFieldProps<T extends string> = {
   labelName: string;
-  items: string[];
-  value?: string;
-  onChange?: (value: string) => void;
+  items: readonly T[];
+  value?: T;
+  onChange?: (value: T) => void;
 };
 
-export default function SelectField({ labelName, items, value, onChange }: SelectFieldProps) {
+export default function SelectField<T extends string>({
+  labelName,
+  items,
+  value,
+  onChange
+}: SelectFieldProps<T>) {
   const [internalValue, setInternalValue] = React.useState(items[0]);
 
   const isControlled = value !== undefined;
@@ -22,7 +27,7 @@ export default function SelectField({ labelName, items, value, onChange }: Selec
   const classes = useStyles();
 
   const handleChange = (event: SelectChangeEvent) => {
-    const next = event.target.value;
+    const next = event.target.value as T; // one cast, kept inside the component
     if (!isControlled) setInternalValue(next);
     onChange?.(next);
   };

@@ -2,7 +2,8 @@ import type {
   KafkaMessage,
   ScanRequest,
   SearchMessagesParams,
-  TopicMetadata
+  TopicMetadata,
+  TopicSummary
 } from "../types/kafka";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -10,7 +11,7 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export async function getTopicNames(
   clusterProfileName: string,
   signal: AbortSignal
-): Promise<string[]> {
+): Promise<TopicSummary[]> {
   const url = `https://localhost:7208/api/topics/names?clusterProfile=${encodeURIComponent(clusterProfileName)}`;
   const response = await fetch(url, { signal });
 

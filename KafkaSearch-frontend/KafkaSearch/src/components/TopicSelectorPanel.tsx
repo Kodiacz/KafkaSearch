@@ -12,19 +12,24 @@ import { describeTopic, getTopicNames } from "../api/kafkaClient.ts";
 import { matchSorter } from "match-sorter";
 import useAsync from "../hooks/useAsync.tsx";
 import useLazyAsync from "../hooks/useLazyAsync.tsx";
-import type { TopicMetadata } from "../types/kafka.ts";
+import type { PartitionInfo, TopicMetadata, TopicSummary } from "../types/kafka.ts";
 
-const TopicSelectorPanel = () => {
+type TopicSelectorPanelProps = {
+  topics: string[];
+  selectedTopic: string | undefined;
+  loadingTopics: boolean;
+  onTopicChange?: (topic: string | null) => void;
+};
+
+const TopicSelectorPanel = ({
+  topics,
+  selectedTopic,
+  loadingTopics,
+  onTopicChange,
+}: TopicSelectorPanelProps) => {
   const styles = useStyles();
   const [openTopicDescriptionModal, setOpenTopicDescriptionModal] =
     useState<boolean>(false);
-  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
-
-  const {
-    data: topicNames,
-    loading: loadingTopics,
-    error: topicsError
-  } = useAsync<string[]>((signal) => getTopicNames("dev", signal), []);
 
   const filterOptions = (
     options: string[],
@@ -40,14 +45,10 @@ const TopicSelectorPanel = () => {
 
   const handleDescribeTopic = () => {
     setOpenTopicDescriptionModal(true);
-    if (selectedTopic)
-      fetchTopicDescription((signal) =>
-        describeTopic("dev", selectedTopic, signal)
-      );
-  };
 
-  console.log("selectedTopic:", selectedTopic);
-  console.log("topicMetadata:", topicMetadata);
+    if (selectedTopic)
+      fetchTopicDescription((signal) => describeTopic("dev", selectedTopic, signal));
+  };
 
   useEffect(() => {
     console.log(topicMetadata);
@@ -57,9 +58,11 @@ const TopicSelectorPanel = () => {
     <Paper elevation={3} className={styles.panel}>
       <Autocomplete
         value={selectedTopic}
-        onChange={(event, newValue) => setSelectedTopic(newValue)}
+        onChange={(event, newValue) => {
+          onTopicChange?.(newValue);
+        }}
         disablePortal
-        options={topicNames ?? []}
+        options={topics}
         filterOptions={filterOptions}
         sx={{ width: 300 }}
         renderInput={(params) => <TextField {...params} label="Topics" />}
