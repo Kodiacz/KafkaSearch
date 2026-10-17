@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { KafkaMessage, ScanRequest } from "../types/kafka";
 import { scanMessages } from "../api/kafkaClient";
+import { ApiError } from "../api/ApiError";
 
 export function useMessageScan() {
   const [messages, setMessages] = useState<KafkaMessage[]>([]);
-  const [status, setStatus] = useState<"idle" | "running" | "done" | "error">("idle");
-  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<"idle" | "running" | "done" | "error">(
+    "idle"
+  );
+  const [error, setError] = useState<ApiError | Error | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const start = useCallback(async (request: ScanRequest) => {
@@ -25,8 +28,8 @@ export function useMessageScan() {
       );
       if (!controller.signal.aborted) setStatus("done");
     } catch (e) {
-      if (controller.signal.aborted) return;  // aborts aren't errors
-      setError(e instanceof Error ? e.message : String(e));
+      if (controller.signal.aborted) return; // aborts aren't errors
+      setError(e instanceof Error ? e : new Error(String(e)));
       setStatus("error");
     }
   }, []);

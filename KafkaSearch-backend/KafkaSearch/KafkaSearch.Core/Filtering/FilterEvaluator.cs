@@ -30,11 +30,11 @@ public class FilterEvaluator : IFilterEvaluator
         foreach (var segment in path.Split('.'))
         {
             var isDifferentThenObject = value.ValueKind != JsonValueKind.Object;
-            var isNotParsed = !value.TryGetProperty(segment, out var property);
-            var resultInspection = property.ToString();
+            //var isNotParsed = !value.TryGetProperty(segment, out var property);
 
-            if (isDifferentThenObject || isNotParsed)
+            if (isDifferentThenObject || !value.TryGetProperty(segment, out var property))
             {
+                //var resultInspection = property.ToString();
                 value = default;
                 return false;
             }
@@ -63,7 +63,7 @@ public class FilterEvaluator : IFilterEvaluator
     private static bool AreEqual(JsonElement actual, JsonElement expected)
     {
         //if (actual.GetRawText() == "121666103819871514") Debugger.Break();
-        
+
         if (actual.ValueKind == JsonValueKind.Number && expected.ValueKind == JsonValueKind.Number)
             return actual.GetDecimal().Equals(expected.GetDecimal());
 

@@ -25,14 +25,14 @@ public class TopicService : ITopicService
         _consumerGroupService = consumerGroupService;
     }
 
-    public OperationResult<string[]> GetTopicsNames(string clusterProfileName)
+    public OperationResult<TopicSummary[]> GetTopicsNames(string clusterProfileName)
     {
         var clientMetadataResult = _clusterClientProvider.MetadataFor(clusterProfileName);
 
         if (clientMetadataResult.IsFailure)
             return OperationResult.Fail(clientMetadataResult.Failure);
 
-        var topicNames = clientMetadataResult.Value.Topics.Select(t => t.Topic).ToArray();
+        var topicNames = clientMetadataResult.Value.Topics.Select(t => new TopicSummary(t.Topic, t.Partitions.Count)).ToArray();
 
         return OperationResult.Ok(topicNames);
     }

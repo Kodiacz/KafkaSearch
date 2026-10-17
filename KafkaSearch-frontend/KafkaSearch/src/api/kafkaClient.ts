@@ -5,6 +5,7 @@ import type {
   TopicMetadata,
   TopicSummary
 } from "../types/kafka";
+import { ApiError, type ValidationProblem } from "./ApiError";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -51,8 +52,16 @@ export async function scanMessages(
     signal
   });
 
+  // kafkaClient.ts, in the failure path
   if (!response.ok) {
-    throw new Error(`Scan failed: ${response.status} ${response.statusText}`);
+    const text = await response.text();
+    let problem: ValidationProblem | null = null;
+    try {
+      problem = JSON.parse(text);
+    } catch {
+      /* not JSON */
+    }
+    throw new ApiError(response.status, problem, text);
   }
 
   // Deferred, per your plan — real SSE frame parsing (event:/data: splitting)
@@ -60,12 +69,37 @@ export async function scanMessages(
   // is actually arriving, so you can verify the round trip before writing
   // the parser.
   const reader = response.body?.getReader();
-  const decoder = new TextDecoder();
   if (!reader) return;
+
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  const dispatchFrame = (frame: string) => {
+    // a frame is one or more lines; we only care about "data:" lines
+    const data = frame
+      .split(/\r?\n/)
+      .filter((line) => line.startsWith("data:"))
+      .map((line) => line.slice(5).replace(/^ /, ""))
+      .join("\n");
+
+    if (!data) return;
+    onMessage(JSON.parse(data) as KafkaMessage);
+  };
 
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
-    console.log("raw chunk:", decoder.decode(value, { stream: true }));
+
+    buffer += decoder.decode(value, { stream: true });
+
+    // frames are separated by a blank line
+    const frames = buffer.split(/\r?\n\r?\n/);
+    buffer = frames.pop() ?? ""; // last piece may be incomplete, keep it
+
+    for (const frame of frames) dispatchFrame(frame);
+    // console.log("raw chunk:", decoder.decode(value, { stream: true }));
   }
+
+  buffer += decoder.decode();
+  if (buffer.trim()) dispatchFrame(buffer);
 }

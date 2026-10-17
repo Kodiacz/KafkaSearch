@@ -6,5 +6,5 @@ using KafkaSearch.Core.Models;
 public interface ITopicService
 {
     Task<OperationResult<TopicMetadata>> DescribeTopic(string clusterProfileName, string topic, CancellationToken cancellationToken = default);
-    OperationResult<string[]> GetTopicsNames(string clusterProfileName);
+    OperationResult<TopicSummary[]> GetTopicsNames(string clusterProfileName);
 }

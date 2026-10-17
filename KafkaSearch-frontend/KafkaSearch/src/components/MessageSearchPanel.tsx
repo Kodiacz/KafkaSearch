@@ -6,21 +6,25 @@ import TextField from "@mui/material/TextField";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { type Dayjs } from "dayjs";
 import { useStyles } from "./css/TopicSelectorPanel.styles.ts";
-import { Button } from "@mui/material";
+import { Alert, Button } from "@mui/material";
 import { scanMessages } from "../api/kafkaClient.ts";
 import { SEEK_MODES, SeekMode, type PartitionInfo } from "../types/kafka.ts";
+import { ApiError } from "../api/ApiError.ts";
 
 type MessageSearchPanelProps = {
   topic: string;
   partitionIds: number[];
   onFetch: any;
   onCancel?: () => void;
+  scanError: any;
 };
 
 const MessageSearchPanel = ({
   topic,
   partitionIds: partitionsIds,
-  onFetch
+  onFetch,
+  onCancel,
+  scanError
 }: MessageSearchPanelProps) => {
   const [maxResults, setMaxResults] = useState(10);
   const [timestamp, setTimestamp] = useState<Dayjs | null>(null);
@@ -62,6 +66,8 @@ const MessageSearchPanel = ({
 
   const isSeekModeTimestamp = searchMode === SeekMode.Timestamp;
   const isSeekModeOffset = searchMode === SeekMode.Offset;
+
+  console.log('scanError => ', scanError)
 
   return (
     <Paper elevation={3} className={styles.panel}>

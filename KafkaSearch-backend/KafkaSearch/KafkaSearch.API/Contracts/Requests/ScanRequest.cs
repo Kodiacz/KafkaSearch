@@ -8,7 +8,7 @@ public sealed record ScanRequest(
     string Topic,
     FilterNode? Filter,
     int? partition,
-    string key,
+    string? key,
     KeyFormat KeyFormat = KeyFormat.Auto,
     SeekMode seekMode = SeekMode.Newest,
     long? offsetValue = null,

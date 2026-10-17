@@ -10,6 +10,10 @@ import { useState, type MouseEvent } from "react";
 import SelectField from "./buttons/SelectField";
 import { useStyles } from "./css/FilterBuilder.styles";
 import Condition from "./Condition";
+import {
+  discoverFields,
+  type DiscoveredField
+} from "../filtering/discoverFields";
 
 export type ConditionData = {
   id: string;
@@ -18,7 +22,11 @@ export type ConditionData = {
   value: string;
 };
 
-const FilterBuilder = () => {
+type FilterBuilderProps = {
+  discovoredFields: DiscoveredField[];
+};
+
+const FilterBuilder = ({ discovoredFields }: FilterBuilderProps) => {
   const [toggleValue, setToggleValue] = useState<string>("");
   const [conditions, setConditions] = useState<ConditionData[]>([]);
 
@@ -39,13 +47,17 @@ const FilterBuilder = () => {
   };
 
   const handleUpdateCondition = (id: string, patch: Partial<ConditionData>) => {
-  setConditions((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c)));
-};
+    setConditions((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, ...patch } : c))
+    );
+  };
 
-const handleRemoveCondition = (id: string) => {
-  setConditions((prev) => prev.filter((c) => c.id !== id));
-};
+  const handleRemoveCondition = (id: string) => {
+    setConditions((prev) => prev.filter((c) => c.id !== id));
+  };
+  
   console.log("toggleValue", toggleValue);
+  console.log("conditions", conditions);
 
   return (
     <Box className={styles.rootBox}>
@@ -60,17 +72,20 @@ const handleRemoveCondition = (id: string) => {
           <ToggleButton value={"AND"}>AND</ToggleButton>
           <ToggleButton value={"OR"}>OR</ToggleButton>
         </ToggleButtonGroup>
-        <Button endIcon={<AddSharpIcon />} onClick={handleAddCondition}>Add condition</Button>
+        <Button endIcon={<AddSharpIcon />} onClick={handleAddCondition}>
+          Add condition
+        </Button>
       </Box>
       {conditions.map((c) => (
-  <Condition
-    key={c.id}
-    conditionBoxStyle={styles.conditionBox}
-    value={c}
-    onChange={(patch) => handleUpdateCondition(c.id, patch)}
-    onRemove={() => handleRemoveCondition(c.id)}
-  />
-))}
+        <Condition
+          key={c.id}
+          discoveredFields={discovoredFields}
+          conditionBoxStyle={styles.conditionBox}
+          value={c}
+          onChange={(patch) => handleUpdateCondition(c.id, patch)}
+          onRemove={() => handleRemoveCondition(c.id)}
+        />
+      ))}
     </Box>
   );
 };
